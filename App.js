@@ -9,49 +9,31 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View
+  Image,
+  View,
+  TouchableOpacity,
+  AsyncStorage
 } from 'react-native';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+import {Actions, Scene, Router} from 'react-native-router-flux';
+
+import Home from './app/components/Home';
+import Login from './app/components/Login';
+import Tutorial from './app/components/Tutorial';
+import Discover from './app/components/Discover';
 
 export default class App extends Component<{}> {
+
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit App.js
-        </Text>
-        <Text style={styles.instructions}>
-          {instructions}
-        </Text>
-      </View>
+      <Router>
+        <Scene key="root">
+          <Scene key="home" component={Home} hideNavBar={false}/>
+          <Scene key="tutorial" component={Tutorial} hideNavBar />
+          <Scene key="login" component={Login} hideNavBar />
+          <Scene key="discover" component={Discover} hideNavBar={false} title="Discover"/>
+        </Scene>
+      </Router>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
