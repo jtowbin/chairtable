@@ -57,7 +57,7 @@ export default class Discover extends Component<{}> {
               loggedIn: true,
             });
 
-            Actions.discover();
+            Actions.main({type: 'reset'});
           }
         });
       }
