@@ -10,4 +10,5 @@ module.exports = {
 
   STORAGE_KEY_TUTORIAL_IS_VIEWED: 'tutorial_is_viewed',
   STORAGE_KEY_LOGGED_IN: 'logged_in',
+  MAPBOX_ACCESS_TOKEN: 'pk.eyJ1IjoiZnJpZmViIiwiYSI6ImNqYXR6NWZrZDFybTQyd3BoeTkzdnZiOWUifQ.3VEaucL01Hj4Lf7nHAwJgw',
 };

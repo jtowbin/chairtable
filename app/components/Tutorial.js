@@ -10,30 +10,65 @@ import {
   StyleSheet,
   Text,
   Image,
+  ImageBackground,
   View,
   TouchableOpacity,
-  AsyncStorage
+  AsyncStorage,
+  Dimensions
 } from 'react-native';
 
 import {Actions} from 'react-native-router-flux';
 
 import Swiper from 'react-native-swiper';
 import Globals from '../Globals.js';
-import Helpers from '../Helpers.js';
+import {fbAuth} from '../Helpers.js';
+
+const { width, height } = Dimensions.get('window');
+const SCREEN_WIDTH = width;
+const ASPECT_RATIO = width / height;
 
 export default class Tutorial extends Component<{}> {
+  constructor() {
+    super();
+    this.state = {
+      swipeIndex: 0
+    };
+  }
+
   render() {
+    console.log(this.state.swipeIndex);
+    let skipButton = <View />;
+    if (this.state.swipeIndex != 2) {
+      skipButton =
+      <TouchableOpacity onPress={this.onSkipButtonPress} style={{marginLeft: 24}}>
+        <Text style={styles.skipText}>Skip</Text>
+      </TouchableOpacity>
+    }
+
+    var doneButton = <View />;
+    if (this.state.swipeIndex == 2) {
+      doneButton = <TouchableOpacity onPress={this.onSkipButtonPress} style={{marginRight: 24}}>
+        <Text style={styles.skipText}>Done</Text>
+      </TouchableOpacity>
+    }
+
     return (
       <View style={styles.container}>
-        <TouchableOpacity onPress={this.onSkipButtonPress} style={{width: '100%', marginTop: 20}}>
-              <Text style={styles.skipText}>Skip</Text>
-        </TouchableOpacity>
+        <View style={styles.topContainer}>
+          {skipButton}
+          {doneButton}
+        </View>
 
-        <Swiper style={styles.wrapper} showsButtons={false} loop={false}>
+        <Swiper
+          style={styles.wrapper}
+          showsButtons={false}
+          onIndexChanged={this.onIndexChanged}
+          loop={false}>
           <View style={styles.slide1}>
             <View>
-              <Image source={require('../img/efwf.png')} />
-              <Image style={{...StyleSheet.absoluteFillObject}} source={require('../img/button.png')} />
+              <ImageBackground style={styles.backgroundImage} source={require('../img/bg_tutorial_1.png')}>
+                <Image source={require('../img/button.png')} />
+              </ImageBackground>
             </View>
 
             <Text style={styles.text}>Explore 1,000+ Displays</Text>
@@ -41,8 +76,9 @@ export default class Tutorial extends Component<{}> {
           </View>
           <View style={styles.slide2}>
             <View>
-              <Image source={require('../img/familyviewinghouse.png')} />
-              <Image style={{...StyleSheet.absoluteFillObject}} source={require('../img/map_point.png')} />
+              <ImageBackground style={styles.backgroundImage} source={require('../img/bg_tutorial_2.png')}>
+                <Image source={require('../img/map_point.png')} />
+              </ImageBackground>
             </View>
 
             <Text style={styles.text}>Start a new family tradition</Text>
@@ -50,8 +86,9 @@ export default class Tutorial extends Component<{}> {
           </View>
           <View style={styles.slide3}>
             <View>
-              <Image source={require('../img/santadriving.png')} />
-              <Image style={{...StyleSheet.absoluteFillObject}} source={require('../img/directions_arrow.png')} />
+              <ImageBackground style={styles.backgroundImage} source={require('../img/bg_tutorial_3.png')}>
+                <Image source={require('../img/directions_arrow.png')} />
+              </ImageBackground>
             </View>
 
             <Text style={styles.text}>Get driving directions</Text>
@@ -59,11 +96,17 @@ export default class Tutorial extends Component<{}> {
           </View>
         </Swiper>
 
-          <TouchableOpacity onPress={this.onSkipButtonPress} style={{width: '100%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#3B5998', height: 40}}>
-                <Image source={require('../img/facebook_icon.png')} />
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity style={{width: '100%', justifyContent: 'center', alignItems: 'center'}} onPress={fbAuth}>
+              <Image source={require('../img/facebook_icon.png')} />
           </TouchableOpacity>
+        </View>
       </View>
     );
+  }
+
+  onIndexChanged = (index) => {
+    this.setState({swipeIndex: index});
   }
 
   onSkipButtonPress() {
@@ -76,14 +119,11 @@ export default class Tutorial extends Component<{}> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    backgroundColor: 'white'
   },
   skipText: {
     fontSize: 14,
-    marginTop: 10,
-    marginBottom: 10,
-    marginLeft: 24
+    color: '#999999'
   },
   wrapper: {
   },
@@ -111,5 +151,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginLeft: 40,
     marginRight: 40
+  },
+  backgroundImage: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_WIDTH/2.15,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  topContainer: {
+    marginTop: 20,
+    height: 50,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  bottomContainer: {
+    backgroundColor: '#3B5998',
+    height: 50,
+    flexDirection: 'row',
   }
 });

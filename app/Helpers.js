@@ -1,4 +1,11 @@
+import {
+  AsyncStorage
+} from 'react-native';
+
 import Globals from './Globals.js';
+import FBSDK, { LoginButton, LoginManager, AccessToken, GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
+import firebase from 'react-native-firebase';
+import {Actions} from 'react-native-router-flux';
 
 export async function markTutorialAsViewed() {
   try {
@@ -22,4 +29,61 @@ export async function tutorialIsViewed() {
   }
 
   return tutorialIsViewed;
+}
+
+export function fbAuth() {
+  LoginManager.logInWithReadPermissions(['public_profile', 'email']).then(function(result) {
+       if (result.isCancelled) {
+          console.log('Login was cancelled')
+       } else {
+          AccessToken.getCurrentAccessToken().then(function(accessTokenData) {
+
+             const credential = firebase.auth.FacebookAuthProvider.credential(accessTokenData.accessToken)
+             firebase.auth().signInWithCredential(credential).then(function(result) {
+                // Promise was successful
+
+                const responseDataCallback = (error, result) => {
+                   if (error) {
+                      console.log(error)
+                   } else {
+                      firebase.database().ref('users/' + result.id).set({
+                        email:            result.email,
+                        first_name:       result.first_name,
+                        last_name:        result.last_name,
+                        profile_picture:  result.picture.data.url
+                      });
+
+                      // mark tutorial as viewed (if user goes to facebook login directly from tutorial)
+                      AsyncStorage.setItem(Globals.STORAGE_KEY_TUTORIAL_IS_VIEWED, "1");
+
+                      // mark user as logged in
+                      AsyncStorage.setItem(Globals.STORAGE_KEY_LOGGED_IN, "1");
+
+                      return Actions.main({type: 'reset'})
+                   }
+                }
+
+                const dataRequest = new GraphRequest(
+                   '/me',
+                   {
+                      accessToken: accessTokenData.accessToken.toString(),
+                      parameters: {
+                         fields: {
+                            string: 'id, first_name, last_name, email, picture'
+                         }
+                      }
+                   },
+                   responseDataCallback
+                )
+
+                new GraphRequestManager().addRequest(dataRequest).start()
+             }, function(error) {
+                // Promise was rejected
+                console.log(error)
+             })
+          })
+       }
+    }, function(error) {
+       console.log('Some error occured:' + error)
+    })
 }

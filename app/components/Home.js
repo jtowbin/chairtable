@@ -42,7 +42,7 @@ export default class Discover extends Component<{}> {
       } else {
         // check if user is logged in
         AsyncStorage.getItem(Globals.STORAGE_KEY_LOGGED_IN).then(value => {
-          if (value == null) {
+          if (value == null || value == "0") {
             // not logged in
             this.setState({
               tutorialViewed: true,

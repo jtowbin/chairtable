@@ -59,14 +59,15 @@ export default class App extends Component<{}> {
           <Scene key="login" component={Login} hideNavBar />
 
           <Drawer
-            hideNavBar
-            key='home'
-            contentComponent={Sidebar}>
+            hideNavBar={true}
+            key='main'
+            contentComponent={Sidebar}
+            drawerIcon={() => <Image source={require('./app/img/menu_icon.png')} />}>
 
             <Tabs
-              key="main"
+              key="tabs"
               tabs
-              hideNavBar
+              hideNavBar={true}
               gestureEnabled={false}
               showLabel={false}
               iconStyle={styles.calcTabBarIconStyle}
@@ -75,16 +76,16 @@ export default class App extends Component<{}> {
               tabBarSelectedItemStyle={styles.tabBarSelectedItemStyle}
               activeBackgroundColor='#fff'>
 
-              <Stack key="calcTab1" title="discover" icon={TabIcon}>
-                <Scene key="discover" component={Discover} title="Discover"/>
+              <Stack key="tab1" title="discover" icon={TabIcon}>
+                <Scene key="discover" component={Discover} title="Discover" hideNavBar={true} />
               </Stack>
 
-              <Stack key="calcTab2" title="map" icon={TabIcon}>
-                <Scene key="map" component={Map} title="Map"/>
+              <Stack key="tab2" title="map" icon={TabIcon}>
+                <Scene key="map" component={Map} title="Map" hideNavBar={true}/>
               </Stack>
 
-              <Stack key="calcTab3" title="profile" icon={TabIcon}>
-                <Scene key="profile" component={Profile} title="Profile"/>
+              <Stack key="tab3" title="profile" icon={TabIcon}>
+                <Scene key="profile" component={Profile} title="Profile" hideNavBar={true} />
               </Stack>
 
             </Tabs>

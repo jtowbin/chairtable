@@ -12,79 +12,35 @@ import {
   Image,
   View,
   TouchableOpacity,
-  AsyncStorage
+  AsyncStorage,
+  StatusBar
 } from 'react-native';
 
 import Globals from '../Globals.js';
-import {Actions} from 'react-native-router-flux';
-import FBSDK, { LoginButton, LoginManager, AccessToken, GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
-import firebase from 'react-native-firebase';
+import {fbAuth} from '../Helpers.js';
 
 export default class Login extends Component<{}> {
   render() {
     return (
       <View style={styles.container}>
-          <Image source={require('../img/deer_3x.png')} />
+        <StatusBar
+           backgroundColor="blue"
+           barStyle="light-content"
+         />
 
-          <TouchableOpacity onPress={this.fbAuth}>
-              <Image source={require('../img/facebook_login_btn.png')} />
+        <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'center'}}>
+          <Image style={styles.logo} source={require('../img/deer.png')} />
+          <Text style={styles.titleText}>Welcome to Rudolf</Text>
+          <Text style={styles.subtitleText}>Rudof is a Christmas enthusiast-only community of decorators and families from all over the world.</Text>
+        </View>
+
+        <View style={{height: 150}}>
+          <TouchableOpacity onPress={fbAuth}>
+              <Image style={styles.facebookButton} source={require('../img/facebook_login_btn.png')} />
           </TouchableOpacity>
+        </View>
       </View>
     );
-  }
-
-  fbAuth() {
-    LoginManager.logInWithReadPermissions(['public_profile', 'email']).then(function(result) {
-         if (result.isCancelled) {
-            console.log('Login was cancelled')
-         } else {
-            AccessToken.getCurrentAccessToken().then(function(accessTokenData) {
-
-               const credential = firebase.auth.FacebookAuthProvider.credential(accessTokenData.accessToken)
-               firebase.auth().signInWithCredential(credential).then(function(result) {
-                  // Promise was successful
-
-                  const responseDataCallback = (error, result) => {
-                     if (error) {
-                        console.log(error)
-                     } else {
-                        firebase.database().ref('users/' + result.id).set({
-                          email:            result.email,
-                          first_name:       result.first_name,
-                          last_name:        result.last_name,
-                          profile_picture:  result.picture.data.url
-                        });
-
-                        // mark user as logged in
-                        AsyncStorage.setItem(Globals.STORAGE_KEY_LOGGED_IN, "1");
-
-                        return Actions.home({type: 'reset'})
-                     }
-                  }
-
-                  const dataRequest = new GraphRequest(
-                     '/me',
-                     {
-                        accessToken: accessTokenData.accessToken.toString(),
-                        parameters: {
-                           fields: {
-                              string: 'id, first_name, last_name, email, picture'
-                           }
-                        }
-                     },
-                     responseDataCallback
-                  )
-
-                  new GraphRequestManager().addRequest(dataRequest).start()
-               }, function(error) {
-                  // Promise was rejected
-                  console.log(error)
-               })
-            })
-         }
-      }, function(error) {
-         console.log('Some error occured:' + error)
-      })
   }
 }
 
@@ -95,4 +51,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#423747'
   },
+  logo: {
+    marginTop: 140,
+  },
+  titleText: {
+    marginTop: 15,
+    fontFamily: 'Avenir-Heavy',
+    fontSize: 20,
+    color: 'white'
+  },
+  subtitleText: {
+    marginTop: 30,
+    textAlign: 'center',
+    width: 270,
+    fontFamily: 'Avenir-Heavy',
+    fontSize: 15,
+    color: 'white',
+  },
+  facebookButton: {
+    width: 200,
+    height: 40
+  }
 });
