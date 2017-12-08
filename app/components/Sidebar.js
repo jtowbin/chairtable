@@ -12,6 +12,7 @@ import {
 import Globals from '../Globals.js';
 import {Actions} from 'react-native-router-flux';
 import firebase from 'react-native-firebase';
+import CookieManager from 'react-native-cookies';
 
 const styles = StyleSheet.create({
   container: {
@@ -128,6 +129,7 @@ export default class Sidebar extends Component {
     }
 
     onLogoutButtonPressed() {
+      CookieManager.clearAll();
       firebase.auth().signOut();
       AsyncStorage.setItem(Globals.STORAGE_KEY_LOGGED_IN, "0");
       Actions.login({type: 'reset'});

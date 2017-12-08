@@ -40,40 +40,35 @@ export default class Discover extends Component<{}> {
           </TouchableOpacity>
         </View>
 
-        <View style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginLeft: 20,
-          marginRight: 20}}>
+        <View style={styles.dataContainer}>
 
           <FlatList
             showsVerticalScrollIndicator={false}
             data={[
               {
                 title: 'Ivar\'s Clam Lights',
-                image: require('../img/sample_spot_1.png'),
+                image: require('../img/sample_spot_1_ns.png'),
                 starCount: 4.6,
               },
               {
                 title: 'Richmond Tacky Light House',
-                image: require('../img/sample_spot_2.png'),
+                image: require('../img/sample_spot_2_ns.png'),
                 starCount: 2.5,
               },
               {
                 title: 'Hans Holiday House',
-                image: require('../img/sample_spot_3.png'),
+                image: require('../img/sample_spot_3_ns.png'),
                 starCount: 1.3,
               },
               {
                 title: 'Callahan Christmas',
-                image: require('../img/sample_spot_4.png'),
+                image: require('../img/sample_spot_4_ns.png'),
                 starCount: 3.8,
               }
             ]}
             renderItem={({item}) =>
-              <View style={{marginBottom: 20, flexDirection: 'column', backgroundColor: 'white'}}>
-                <Image resizeMode={'cover'} source={item.image} />
+              <View style={styles.cardView}>
+                <Image style={{width: '100%', resizeMode: 'cover', marginBottom: 20}} source={item.image} />
                 <Text style={{marginLeft: 20, marginBottom: 5, fontSize: 17, fontFamily: 'Monaco'}}>{item.title}</Text>
                 <View style={{marginLeft: 20, marginBottom: 20, flexDirection: 'row', alignItems: 'center'}}>
                   <StarRating
@@ -129,5 +124,21 @@ const styles = StyleSheet.create({
   filterIcon: {
     marginTop: 12,
     marginRight: 22
+  },
+  dataContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  cardView: {
+    marginLeft: 20,
+    marginRight: 20,
+    marginBottom: 20,
+    marginTop: 4,
+    flexDirection: 'column',
+    backgroundColor: 'white',
+    shadowColor: 'black',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.4,
+    shadowRadius: 3
   }
 });

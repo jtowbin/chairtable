@@ -41,7 +41,6 @@ export function fbAuth() {
              const credential = firebase.auth.FacebookAuthProvider.credential(accessTokenData.accessToken)
              firebase.auth().signInWithCredential(credential).then(function(result) {
                 // Promise was successful
-
                 const responseDataCallback = (error, result) => {
                    if (error) {
                       console.log(error)

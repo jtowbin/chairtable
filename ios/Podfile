@@ -11,33 +11,33 @@ target 'chairtable' do
   pod 'Firebase/Database'
 
   # Flexbox Layout Manager Used By React Natve
-  pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga/Yoga.podspec'
+#  pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga/Yoga.podspec'
 
   # React Native
-  pod 'React', path: '../node_modules/react-native', subspecs: [
+#  pod 'React', path: '../node_modules/react-native', subspecs: [
 
   # Comment out any unneeded subspecs to reduce bundle size.
-  'Core',
-  ‘BatchedBridge',
+#  'Core',
+#  ‘BatchedBridge',
 #  'DevSupport',
-  'RCTActionSheet',
-  'RCTAnimation',
-  'RCTBlob',
+#  'RCTActionSheet',
+#  'RCTAnimation',
+#  'RCTBlob',
 #  'RCTCameraRoll',
-  'RCTGeolocation',
-  'RCTImage',
-  'RCTNetwork',
+#  'RCTGeolocation',
+#  'RCTImage',
+#  'RCTNetwork',
 #  'RCTPushNotification',
-  'RCTSettings',
+#  'RCTSettings',
 #  'RCTTest',
-  'RCTText',
-  'RCTVibration',
-  'RCTWebSocket',
-  'RCTLinkingIOS'
-  ]
+#  'RCTText',
+#  'RCTVibration',
+#  'RCTWebSocket',
+#  'RCTLinkingIOS'
+#  ]
 
   # Mapbox
-  pod 'react-native-mapbox-gl', :path => '../node_modules/@mapbox/react-native-mapbox-gl'
+#  pod 'react-native-mapbox-gl', :path => '../node_modules/@mapbox/react-native-mapbox-gl'
 
   target 'chairtableTests' do
     inherit! :search_paths
