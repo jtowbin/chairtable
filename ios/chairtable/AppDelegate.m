@@ -13,13 +13,13 @@
 #import <React/RCTRootView.h>
 #import <Firebase.h>
 
+#import <FBSDKCoreKit/FBSDKCoreKit.h>
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   [FIRApp configure];
-  
-  NSURL *jsCodeLocation;
   
   for (NSString* family in [UIFont familyNames])
   {
@@ -30,6 +30,12 @@
     }
   }
 
+  NSURL *jsCodeLocation;
+  [[RCTBundleURLProvider sharedSettings] setDefaults];
+#if DEBUG
+  [[RCTBundleURLProvider sharedSettings] setJsLocation:@"192.168.1.114"];
+#endif
+  
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
@@ -46,4 +52,18 @@
   return YES;
 }
 
+#ifdef __IPHONE_9_0
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary *)options {
+  
+  [[FBSDKApplicationDelegate sharedInstance] application:application openURL:url sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey] annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
+  
+  return YES;
+}
+#elif defined(__IPHONE_10_0)
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+  [[FBSDKApplicationDelegate sharedInstance] application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
+  
+  return YES;
+}
+#endif
 @end
