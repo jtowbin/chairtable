@@ -9,6 +9,7 @@ target 'chairtable' do
   pod 'Firebase/Core'
   pod 'Firebase/Auth'
   pod 'Firebase/Database'
+  pod 'Firebase/Storage'
 
   # Flexbox Layout Manager Used By React Natve
 #  pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga/Yoga.podspec'
@@ -38,6 +39,8 @@ target 'chairtable' do
 
   # Mapbox
 #  pod 'react-native-mapbox-gl', :path => '../node_modules/@mapbox/react-native-mapbox-gl'
+
+#  pod 'react-native-image-picker', :path => '../node_modules/react-native-image-picker'
 
   target 'chairtableTests' do
     inherit! :search_paths

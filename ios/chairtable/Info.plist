@@ -97,5 +97,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+  <key>NSCameraUsageDescription</key>
+  <string>Camera will be accessed</string>
+  <key>NSPhotoLibraryUsageDescription</key>
+  <string>Photo library access is needed</string>
+  <key>NSPhotoLibraryAddUsageDescription</key>
+  <string>Photo library access is needed</string>
 </dict>
 </plist>

@@ -3,6 +3,8 @@ package com.chairtable;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.imagepicker.ImagePickerPackage;
+import com.mapbox.rctmgl.RCTMGLPackage;
 import com.psykar.cookiemanager.CookieManagerPackage;
 import com.facebook.reactnative.androidsdk.FBSDKPackage;
 import io.invertase.firebase.RNFirebasePackage;
@@ -26,6 +28,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ImagePickerPackage(),
+            new RCTMGLPackage(),
             new CookieManagerPackage(),
             new FBSDKPackage(),
             new RNFirebasePackage()

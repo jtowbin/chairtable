@@ -19,6 +19,21 @@ import {
 import firebase from 'react-native-firebase';
 import {Actions} from 'react-native-router-flux';
 
+var ImagePicker = require('react-native-image-picker');
+var uuid = require('uuid-js');
+
+// More info on all the options is below in the README...just some common use cases shown here
+var options = {
+  title: 'Select Avatar',
+  customButtons: [
+    {name: 'fb', title: 'Choose Photo from Facebook'},
+  ],
+  storageOptions: {
+    skipBackup: true,
+    path: 'images'
+  }
+};
+
 const CATEGORY_ANIMATION = 'Animation';
 const CATEGORY_RESIDENTIAL = 'Residential';
 const CATEGORY_MUSIC = 'Music';
@@ -32,10 +47,19 @@ export default class CreateDisplay extends Component<{}> {
       displayTitle: '',
       displayDescription: '',
       displayCategory: 'Animation',
+      avatarSource: null// { uri: 'https://cloud.netlifyusercontent.com/assets/344dbf88-fdf9-42bb-adb4-46f01eedd629/68dd54ca-60cf-4ef7-898b-26d7cbe48ec7/10-dithering-opt.jpg' }
     };
   }
 
   render() {
+    var imageCapture = <View style={styles.emptyCameraContainer}>
+      <Image source={require('../img/icon_camera.png')} /><Text style={styles.cameraText}>ADD COVER PHOTO</Text>
+    </View>;
+
+    if (this.state.avatarSource != null) {
+      imageCapture = <Image style={styles.cameraIcon} source={this.state.avatarSource} />
+    }
+
     return (
       // <View style={styles.container}>
       <ImageBackground
@@ -49,7 +73,7 @@ export default class CreateDisplay extends Component<{}> {
 
           <Text style={styles.titleText}>Add new display</Text>
 
-          <TouchableOpacity style={styles.saveButton} onPress={this.onSavePressed}>
+          <TouchableOpacity style={styles.saveButton} onPress={this.onSavePressed.bind(this)}>
             <Text style={styles.saveText}>Save</Text>
           </TouchableOpacity>
         </View>
@@ -109,12 +133,11 @@ export default class CreateDisplay extends Component<{}> {
               </View>
             </View>
 
-            <View style={styles.cameraContainer}>
-              <Image style={styles.cameraIcon} source={require('../img/icon_camera.png')} />
-              <Text style={styles.cameraText}>ADD COVER PHOTO</Text>
-            </View>
+            <TouchableOpacity style={styles.cameraContainer} onPress={this.onAddCoverPhoto.bind(this)}>
+              {imageCapture}
+            </TouchableOpacity>
 
-            <TouchableOpacity style={styles.submitButton} onPress={this.onSavePressed}>
+            <TouchableOpacity style={styles.submitButton} onPress={this.onSavePressed.bind(this)}>
               <Image source={require('../img/round_button.png')} />
               <Text style={styles.submitText}>ADD NEW DISPLAY</Text>
             </TouchableOpacity>
@@ -132,11 +155,52 @@ export default class CreateDisplay extends Component<{}> {
   }
 
   onSavePressed() {
+    // upload image to firebase storage
+    var storageRef = firebase.storage().ref();
+    var imagesRef = storageRef.child('user_created/' + uuid.create() + '.jpg');
+    imagesRef.put(this.state.avatarSource.uri).then(function(snapshot) {
+      console.log('Uploaded a data_url string!');
+      console.log(snapshot.downloadURL);
 
+      firebase.database().ref('user_displays').set({
+        // title: this.state.displayTitle,
+        // description: this.state.displayDescription,
+        // category: this.state.displayCategory,
+        profile_picture: snapshot.downloadURL
+      });
+    }).catch(function(error) {
+      console.log('Could not upload image');
+    });
   }
 
   onCategoryPressed() {
     this.setState({displayCategory: 'Animation'});
+  }
+
+  onAddCoverPhoto() {
+    ImagePicker.showImagePicker(options, (response) => {
+      console.log('Response = ', response);
+
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      }
+      else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      }
+      else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+      }
+      else {
+        let source = { uri: response.uri };
+
+        // You can also display the image using data:
+        // let source = { uri: 'data:image/jpeg;base64,' + response.data };
+
+        this.setState({
+          avatarSource: source
+        });
+      }
+    });
   }
 }
 
@@ -233,11 +297,20 @@ const styles = StyleSheet.create({
   cameraContainer: {
     marginTop: 10,
     height: 160,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  emptyCameraContainer: {
+    flex: 1,
+    width: '100%',
     backgroundColor: '#F6F6F9',
     justifyContent: 'center',
     alignItems: 'center'
   },
-  cameraIcon: {},
+  cameraIcon: {
+    width: '100%',
+    height: '100%'
+  },
   cameraText: {
     marginTop: 10,
     fontFamily: 'Monaco',
