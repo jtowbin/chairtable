@@ -19,6 +19,11 @@ import {
 import firebase from 'react-native-firebase';
 import {Actions} from 'react-native-router-flux';
 
+const CATEGORY_ANIMATION = 'Animation';
+const CATEGORY_RESIDENTIAL = 'Residential';
+const CATEGORY_MUSIC = 'Music';
+const CATEGORY_CHARITABLE = 'Charitable';
+
 export default class CreateDisplay extends Component<{}> {
 
   constructor() {
@@ -26,6 +31,7 @@ export default class CreateDisplay extends Component<{}> {
     this.state = {
       displayTitle: '',
       displayDescription: '',
+      displayCategory: 'Animation',
     };
   }
 
@@ -52,7 +58,7 @@ export default class CreateDisplay extends Component<{}> {
 
           <View style={styles.inputContainer}>
             <View style={styles.addDisplayIcon}>
-            <Image source={require('../img/icon_add_display.png')} />
+              <Image source={require('../img/icon_add_display.png')} />
             </View>
 
             <TextInput
@@ -71,34 +77,34 @@ export default class CreateDisplay extends Component<{}> {
 
             <View style={styles.categoriesContainer}>
               <View style={styles.categoryContainer}>
-                <View style={styles.categoryImageContainer}>
-                  <Image source={require('../img/category_active.png')} />
-                  <Image style={styles.categoryInnerImage} source={require('../img/category_icon_animation.png')} />
-                </View>
+                <TouchableOpacity style={styles.categoryImageContainer} onPress={() => this.setState({'displayCategory' : CATEGORY_ANIMATION})}>
+                  <Image source={this.state.displayCategory == CATEGORY_ANIMATION ? require('../img/category_active.png') : require('../img/category_inactive.png')} />
+                  <Image style={styles.categoryInnerImage} source={this.state.displayCategory == CATEGORY_ANIMATION ? require('../img/category_icon_animation_inactive.png') : require('../img/category_icon_animation_active.png')} />
+                </TouchableOpacity>
                 <Text style={styles.categoryText}>ANIMATION</Text>
               </View>
 
               <View style={styles.categoryContainer}>
-                <View style={styles.categoryImageContainer}>
-                  <Image source={require('../img/category_inactive.png')} />
-                  <Image style={styles.categoryInnerImage} source={require('../img/category_icon_music.png')} />
-                </View>
+                <TouchableOpacity style={styles.categoryImageContainer} onPress={() => this.setState({'displayCategory' : CATEGORY_MUSIC})}>
+                  <Image source={this.state.displayCategory == CATEGORY_MUSIC ? require('../img/category_active.png') : require('../img/category_inactive.png')} />
+                  <Image style={styles.categoryInnerImage} source={this.state.displayCategory == CATEGORY_MUSIC ? require('../img/category_icon_music_inactive.png') : require('../img/category_icon_music_active.png')} />
+                </TouchableOpacity>
                 <Text style={styles.categoryText}>MUSIC</Text>
               </View>
 
               <View style={styles.categoryContainer}>
-                <View style={styles.categoryImageContainer}>
-                  <Image source={require('../img/category_inactive.png')} />
-                  <Image style={styles.categoryInnerImage} source={require('../img/category_icon_neighborhood.png')} />
-                </View>
+                <TouchableOpacity style={styles.categoryImageContainer} onPress={() => this.setState({'displayCategory' : CATEGORY_RESIDENTIAL})}>
+                  <Image source={this.state.displayCategory == CATEGORY_RESIDENTIAL ? require('../img/category_active.png') : require('../img/category_inactive.png')} />
+                  <Image style={styles.categoryInnerImage} source={this.state.displayCategory == CATEGORY_RESIDENTIAL ? require('../img/category_icon_neighborhood_inactive.png') : require('../img/category_icon_neighborhood_active.png')} />
+                </TouchableOpacity>
                 <Text style={styles.categoryText}>NEIGHBORHOOD</Text>
               </View>
 
               <View style={styles.categoryContainer}>
-                <View style={styles.categoryImageContainer}>
-                  <Image source={require('../img/category_inactive.png')} />
-                  <Image style={styles.categoryInnerImage} source={require('../img/category_icon_charitable.png')} />
-                </View>
+                <TouchableOpacity style={styles.categoryImageContainer} onPress={() => this.setState({'displayCategory' : CATEGORY_CHARITABLE})}>
+                  <Image source={this.state.displayCategory == CATEGORY_CHARITABLE ? require('../img/category_active.png') : require('../img/category_inactive.png')} />
+                  <Image style={styles.categoryInnerImage} source={this.state.displayCategory == CATEGORY_CHARITABLE ? require('../img/category_icon_charitable_inactive.png') : require('../img/category_icon_charitable_active.png')} />
+                </TouchableOpacity>
                 <Text style={styles.categoryText}>CHARITABLE</Text>
               </View>
             </View>
@@ -127,6 +133,10 @@ export default class CreateDisplay extends Component<{}> {
 
   onSavePressed() {
 
+  }
+
+  onCategoryPressed() {
+    this.setState({displayCategory: 'Animation'});
   }
 }
 
