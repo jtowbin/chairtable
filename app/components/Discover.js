@@ -16,10 +16,70 @@ import {
   FlatList
 } from 'react-native';
 
+import firebase from 'react-native-firebase';
+
 import StarRating from 'react-native-star-rating';
 import {Actions} from 'react-native-router-flux';
 
+// number of displays to load in one request to firebase
+const displaysPerPage = 10;
+
+// the firebase connection to the displays data set
+const displaysRef = firebase.database().ref('/Displays');
+
 export default class Discover extends Component<{}> {
+
+  constructor(props) {
+      super(props);
+
+      this.state = {
+        displays: [],
+        refreshing: true,
+        pageOfDisplays: 0
+      };
+  }
+
+  // retrieving displays from the firebase data set
+  fetchDisplays() {
+      displaysRef
+        .limitToFirst((this.state.pageOfDisplays + 1) * displaysPerPage)
+        .on('value', (snap) => {
+          var items = [];
+          snap.forEach((child) => {
+            if (child.val().Images != null) {
+            items.push({
+              title: child.key,
+              description: child.val().Description,
+              starCount: 4.6,
+              image: child.val().Images[0],
+            });
+          }
+        });
+        this.setState({displays: items, refreshing: false});
+    });
+  }
+
+  componentWillMount() {
+    this.setState(
+      {
+        pageOfDisplays: 0
+      },
+      () => {
+        this.fetchDisplays();
+      }
+    );
+  }
+
+  loadMoreMessages () {
+    this.setState(
+      {
+        pageOfDisplays: this.state.pageOfDisplays+1
+      },
+      () => {
+        this.fetchDisplays();
+      }
+    );
+  }
 
   render() {
     return (
@@ -44,31 +104,14 @@ export default class Discover extends Component<{}> {
 
           <FlatList
             showsVerticalScrollIndicator={false}
-            data={[
-              {
-                title: 'Ivar\'s Clam Lights',
-                image: require('../img/sample_spot_1_ns.png'),
-                starCount: 4.6,
-              },
-              {
-                title: 'Richmond Tacky Light House',
-                image: require('../img/sample_spot_2_ns.png'),
-                starCount: 2.5,
-              },
-              {
-                title: 'Hans Holiday House',
-                image: require('../img/sample_spot_3_ns.png'),
-                starCount: 1.3,
-              },
-              {
-                title: 'Callahan Christmas',
-                image: require('../img/sample_spot_4_ns.png'),
-                starCount: 3.8,
-              }
-            ]}
+            refreshing={this.state.refreshing}
+            data={this.state.displays}
+            onEndReached={this.loadMoreMessages.bind(this)}
+            // onEndReachedThreshold={0}
+            keyExtractor={(item, index) => index}
             renderItem={({item}) =>
               <View style={styles.cardView}>
-                <Image style={{width: '100%', resizeMode: 'cover', marginBottom: 20}} source={item.image} />
+                <Image style={{width: '100%', height: 200, resizeMode: 'cover', marginBottom: 20}} source={{uri: item.image}} />
                 <Text style={{marginLeft: 20, marginBottom: 5, fontSize: 17, fontFamily: 'Monaco'}}>{item.title}</Text>
                 <View style={{marginLeft: 20, marginBottom: 20, flexDirection: 'row', alignItems: 'center'}}>
                   <StarRating

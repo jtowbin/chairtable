@@ -39,6 +39,11 @@ export default class Map extends Component<{}> {
         <TouchableOpacity style={styles.menuIcon} onPress={this.onMenuPressed}>
           <Image source={require('../img/menu_icon.png')} />
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.addDisplayIcon} onPress={this.onCreateDisplayPressed}>
+          <Image source={require('../img/icon_add_display.png')} />
+        </TouchableOpacity>
+
       </View>
     );
   }
@@ -61,6 +66,10 @@ export default class Map extends Component<{}> {
   onMenuPressed() {
     Actions.drawerOpen();
   }
+
+  onCreateDisplayPressed() {
+    Actions.createDisplay();
+  }
 }
 
 const styles = StyleSheet.create({
@@ -74,5 +83,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 32,
     left: 22
+  },
+  addDisplayIcon: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10
   }
 });

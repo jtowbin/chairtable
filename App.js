@@ -15,7 +15,7 @@ import {
   AsyncStorage
 } from 'react-native';
 
-import {Actions, Scene, Router, Stack, Tabs, Drawer} from 'react-native-router-flux';
+import {Actions, Scene, Router, Stack, Tabs, Drawer, Modal} from 'react-native-router-flux';
 
 import Home from './app/components/Home';
 import Login from './app/components/Login';
@@ -23,6 +23,7 @@ import Tutorial from './app/components/Tutorial';
 import Discover from './app/components/Discover';
 import Profile from './app/components/Profile';
 import Map from './app/components/Map';
+import CreateDisplay from './app/components/CreateDisplay';
 
 import Sidebar from './app/components/Sidebar';
 
@@ -57,6 +58,8 @@ export default class App extends Component<{}> {
           <Scene key="home" component={Home} hideNavBar={false}/>
           <Scene key="tutorial" component={Tutorial} hideNavBar />
           <Scene key="login" component={Login} hideNavBar />
+
+          <Scene key="createDisplay" component={CreateDisplay} hideNavBar modal />
 
           <Drawer
             hideNavBar={true}
