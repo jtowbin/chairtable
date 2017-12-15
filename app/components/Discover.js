@@ -17,15 +17,15 @@ import {
 } from 'react-native';
 
 import firebase from 'react-native-firebase';
-
 import StarRating from 'react-native-star-rating';
 import {Actions} from 'react-native-router-flux';
+import Globals from '../Globals';
 
 // number of displays to load in one request to firebase
 const displaysPerPage = 10;
 
 // the firebase connection to the displays data set
-const displaysRef = firebase.database().ref('/Displays');
+const displaysRef = firebase.database().ref('/' + Globals.FIREBASE_TBL_DISPLAYS);
 
 export default class Discover extends Component<{}> {
 
