@@ -4,7 +4,10 @@
 	"private": true,
 	"scripts": {
 		"start": "node node_modules/react-native/local-cli/cli.js start",
-		"test": "jest"
+		"build": "babel app/ -d lib/",
+		"prepublish": "npm run build",
+		"test": "jest",
+		"flow": "flow"
 	},
 	"dependencies": {
 		"@mapbox/react-native-mapbox-gl": "^6.0.1",
@@ -14,14 +17,18 @@
 		"react-native-fbsdk": "^0.6.3",
 		"react-native-firebase": "^3.1.1",
 		"react-native-image-picker": "^0.26.7",
+		"react-native-read-more-text": "^1.0.0",
 		"react-native-router-flux": "^4.0.0-beta.24",
 		"react-native-star-rating": "^1.0.8",
 		"react-native-swiper": "^1.5.13",
 		"uuid-js": "^0.7.5"
 	},
 	"devDependencies": {
+		"babel-cli": "^6.26.0",
 		"babel-jest": "21.2.0",
+		"babel-preset-flow": "^6.23.0",
 		"babel-preset-react-native": "4.0.0",
+		"flow-bin": "^0.61.0",
 		"jest": "21.2.1",
 		"react-test-renderer": "16.0.0"
 	},

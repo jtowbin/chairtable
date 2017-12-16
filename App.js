@@ -24,6 +24,7 @@ import Discover from './app/components/Discover';
 import Profile from './app/components/Profile';
 import Map from './app/components/Map';
 import CreateDisplay from './app/components/CreateDisplay';
+import DisplayDetail from './app/components/DisplayDetail';
 
 import Sidebar from './app/components/Sidebar';
 
@@ -60,6 +61,7 @@ export default class App extends Component<{}> {
           <Scene key="login" component={Login} hideNavBar />
 
           <Scene key="createDisplay" component={CreateDisplay} hideNavBar modal />
+          <Scene key="displayDetail" component={DisplayDetail} hideNavBar />
 
           <Drawer
             hideNavBar={true}
