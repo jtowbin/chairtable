@@ -83,8 +83,12 @@ export default class Map extends Component<{}> {
           <Image source={require('../img/menu_icon.png')} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.addDisplayIcon} onPress={this.onCreateDisplayPressed}>
+        {/* <TouchableOpacity style={styles.addDisplayIcon} onPress={this.onCreateDisplayPressed}>
           <Image source={require('../img/icon_add_display.png')} />
+        </TouchableOpacity> */}
+
+        <TouchableOpacity style={styles.addDisplayIcon} onPress={this.onCurrentLocationPressed}>
+          <Image source={require('../img/current_location_icon.png')} />
         </TouchableOpacity>
 
         {/* <ImageBackground style={styles.cardView}>
@@ -130,6 +134,10 @@ export default class Map extends Component<{}> {
 
   onCreateDisplayPressed() {
     Actions.createDisplay();
+  }
+
+  onCurrentLocationPressed() {
+
   }
 }
 

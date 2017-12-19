@@ -14,15 +14,27 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  TextInput,
+  FlatList
 } from 'react-native';
 
 import firebase from 'react-native-firebase';
 import StarRating from 'react-native-star-rating';
 import {Actions} from 'react-native-router-flux';
 import ReadMore from 'react-native-read-more-text';
-import Globals from '../Globals';
+import PopupDialog, {DialogButton} from 'react-native-popup-dialog';
+import TimeAgo from 'react-native-timeago';
 
-import DisplayView from './views/DisplayView';
+import DisplayRatingView from './views/DisplayRatingView';
+import RatingView from './views/RatingView';
+import {getCurrentUser} from '../Helpers';
+import {
+  fetchDisplay,
+  updateRating,
+  fetchRating,
+  fetchRatingsForDisplay
+} from '../FirebaseHelpers';
+import Globals from '../Globals';
 
 type Display = {
   title: string,
@@ -38,14 +50,10 @@ type Props = {
 type State = {
   display: Display,
   refreshing: boolean,
-  selectedStars: number
+  selectedRating: number,
+  reviewText: string,
+  displayReviews: array,
 };
-
-// number of displays to load in one request to firebase
-const displaysPerPage = 10;
-
-// the firebase connection to the displays data set
-const firebaseRef = firebase.database();
 
 export default class DisplayDetail extends Component<Props, State> {
   constructor(props: Props) {
@@ -54,30 +62,27 @@ export default class DisplayDetail extends Component<Props, State> {
       this.state = {
         display: null,
         refreshing: true,
-        selectedStars: 0
+        selectedRating: 0,
+        reviewText: '',
+        displayReviews: [],
       };
   }
 
-  // retrieving displays from the firebase data set
-  fetchDisplay() {
-      firebaseRef.ref('/' + Globals.FIREBASE_TBL_DISPLAYS + '/' + this.props.displayKey)
-        .on('value', (snap) => {
-          var item = {
-            title: this.props.displayKey, // should be snap.val().Title
-            description: snap.val().Description,
-            starCount: 4.6,
-            image: snap.val().Images[0],
-          };
-
-          this.setState({
-            display: item,
-            refreshing: false
-          });
-        });
-  }
-
   componentWillMount() {
-    this.fetchDisplay();
+    fetchDisplay(this.props.displayKey, (item) => {
+      this.setState({
+        display: item,
+        refreshing: false
+      });
+    });
+
+    fetchRating(getCurrentUser().uid, this.props.displayKey, (review) => {
+      this.setState({
+        selectedRating: review.rating,
+      });
+    });
+
+    fetchRatingsForDisplay(this.props.displayKey, reviews => this.setState({displayReviews: reviews}));
   }
 
   render() {
@@ -94,54 +99,93 @@ export default class DisplayDetail extends Component<Props, State> {
   }
 
   getDisplayView() {
-    return (<View style={{flex: 1}}>
+    return (<View style={{flex: 1, backgroundColor: 'white'}}>
       <View style={styles.cardView}>
-        <Image style={{width: '100%', height: 200, resizeMode: 'cover', marginBottom: 20}} source={{uri: this.state.display.image}} />
-        <Text style={{marginLeft: 20, marginBottom: 5, fontSize: 17, fontFamily: 'Monaco'}}>{this.state.display.title}</Text>
-        <View style={{marginLeft: 20, marginBottom: 20, flexDirection: 'row', alignItems: 'center'}}>
-          <StarRating
-            disabled={true}
-            starStyle={{marginRight: 5}}
-            starSize={10}
-            emptyStar={require('../img/star_empty.png')}
-            fullStar={this.state.display.starCount > 2.5 ? require('../img/star_full.png') : require('../img/star_full_orange.png')}
-            halfStar={this.state.display.starCount > 2.5 ? require('../img/star_half.png') : require('../img/star_half_orange.png')}
-            maxStars={5}
-            rating={this.state.display.starCount}
-            selectedStar={(rating) => this.onStarRatingPress(rating)}
-          />
-          <Text style={{marginLeft: 5, fontSize: 11, color: '#B2B1C1', fontFamily: 'Monaco'}}>{this.state.display.starCount} / 5.0 * 1.3 MI NEARBY</Text>
-        </View>
+        <Image style={{width: '100%', height: 200, resizeMode: 'cover'}} source={{uri: this.state.display.image}} />
+
+        <DisplayRatingView item={this.state.display} />
+
       </View>
-      <ScrollView style={{backgroundColor: 'white'}}>
-        <View style={{backgroundColor: '#f9f9f9', height: 60, justifyContent: 'center'}}>
-          <Text style={{marginLeft: 20, color: 'black', fontWeight: 'bold'}}>OVERVIEW</Text>
-        </View>
-        <View style={{paddingTop: 10, paddingLeft: 20, paddingRight: 20}}>
-          <ReadMore
-              numberOfLines={3}
-              renderTruncatedFooter={this._renderTruncatedFooter}
-              renderRevealedFooter={this._renderRevealedFooter}
-              onReady={this._handleTextReady}>
-              <Text style={{}}>
-                {this.state.display.description}
-              </Text>
-          </ReadMore>
-        </View>
-        <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 10, marginBottom: 10}}>
-          <StarRating
-            disabled={false}
-            starStyle={{marginLeft: 5, marginRight: 5}}
-            starSize={30}
-            emptyStar={require('../img/star_large_empty.png')}
-            fullStar={require('../img/star_large_full.png')}
-            halfStar={require('../img/star_large_empty.png')}
-            maxStars={5}
-            rating={this.state.selectedStars}
-            selectedStar={(rating) => this.onStarRatingPress(rating)}
+
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        // refreshing={this.state.refreshing}
+        data={this.state.displayReviews}
+        // onEndReached={this.loadMoreMessages.bind(this)}
+        // onEndReachedThreshold={0}
+        keyExtractor={item => item.displayUserKey}
+        ItemSeparatorComponent={this.renderSeparator}
+        ListHeaderComponent={this.renderHeader}
+        renderItem={({item}) =>
+          <View style={{flexDirection: 'row'}}>
+            <Image style={{margin: 20, width: 50, height: 50, borderRadius: 25}} source={{uri: item.userPhoto}} />
+            <View style={{flex: 1, marginTop: 25, marginBottom: 10, flexDirection: 'column'}}>
+              <Text style={{marginBottom: 5, fontWeight: 'bold', fontSize: 16}}>{item.userName}</Text>
+
+              <RatingView
+                shouldHideText={true}
+                rating={item.rating} />
+
+              <Text style={{marginTop: 20, fontFamily: 'Monaco', fontSize: 14}}>{item.review}</Text>
+
+              <View style={{alignItems: 'flex-end', marginRight: 10}}>
+                <TimeAgo time={item.date} />
+              </View>
+            </View>
+          </View>
+        } />
+
+      {/* the review popup */}
+      <PopupDialog
+        width={300}
+        ref={(popupDialog) => { this.popupDialog = popupDialog; }}
+        actions={[
+          <View
+            style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end'}}
+            key="button-set-1">
+            <DialogButton
+              text="CANCEL"
+              onPress={() => {
+                this.popupDialog.dismiss();
+                this.onReviewCancelPress();
+              }}
+               />
+            <DialogButton
+              text="RATE"
+              onPress={() => {
+                this.popupDialog.dismiss();
+                this.onReviewSavePress();
+              }}
+               />
+          </View>
+        ]}
+      >
+        <View style={{flex: 1, alignItems: 'center'}}>
+          <Text style={{margin: 10, fontSize: 16, fontFamily: 'Monaco'}}>Rate this display</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 20, marginBottom: 10}}>
+            <StarRating
+              disabled={false}
+              starStyle={{marginLeft: 5, marginRight: 5}}
+              starSize={30}
+              emptyStar={require('../img/star_large_empty.png')}
+              fullStar={require('../img/star_large_full.png')}
+              halfStar={require('../img/star_large_empty.png')}
+              maxStars={5}
+              rating={this.state.selectedRating}
+              selectedStar={(rating) => this.onStarRatingPress(rating)}
+            />
+          </View>
+
+          <TextInput
+            style={styles.reviewText}
+            onChangeText={(text) => this.setState({reviewText: text})}
+            value={this.state.reviewText}
+            multiline={true}
+            maxLength={140}
+            placeholder='Example: An amazing display of Christmas lights. Very family oriented. Santa and Rudolph are there to have pictures taken with the children.'
           />
         </View>
-      </ScrollView>
+      </PopupDialog>
     </View>);
   }
 
@@ -157,13 +201,67 @@ export default class DisplayDetail extends Component<Props, State> {
     );
   }
 
+  renderSeparator = () => {
+    return (
+      <View style={{flex: 1, height: 1, backgroundColor: '#bbbbbb'}} />
+    );
+  }
+
+  renderHeader = () => {
+    return (
+      <View style={{backgroundColor: 'white'}}>
+        <View style={{backgroundColor: '#f9f9f9', height: 60, justifyContent: 'center'}}>
+          <Text style={{marginLeft: 20, color: 'black', fontWeight: 'bold'}}>OVERVIEW</Text>
+        </View>
+        <View style={{paddingTop: 10, paddingLeft: 20, paddingRight: 20}}>
+          <ReadMore
+              numberOfLines={3}
+              renderTruncatedFooter={this._renderTruncatedFooter}
+              renderRevealedFooter={this._renderRevealedFooter}
+              onReady={this._handleTextReady}>
+              <Text style={{fontFamily: 'Monaco'}}>
+                {this.state.display.description}
+              </Text>
+          </ReadMore>
+        </View>
+        <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 10, marginBottom: 10}}>
+          <StarRating
+            disabled={this.state.selectedRating > 0}
+            starStyle={{marginRight: 5}}
+            starSize={30}
+            emptyStar={require('../img/star_large_empty.png')}
+            fullStar={require('../img/star_large_full.png')}
+            halfStar={require('../img/star_large_empty.png')}
+            maxStars={5}
+            selectedStar={() => {
+              this.popupDialog.show();
+            }}
+            rating={this.state.selectedRating}
+          />
+        </View>
+
+      </View>
+    );
+  }
+
+  onReviewCancelPress() {
+    this.setState({
+      selectedRating: 0,
+      reviewText: '',
+    });
+  }
+
+  onReviewSavePress() {
+    updateRating(this.props.displayKey, getCurrentUser().uid, this.state.selectedRating, this.state.reviewText, () => {});
+  }
+
   onBackPressed() {
     Actions.pop();
   }
 
   onStarRatingPress(rating: number) {
     this.setState({
-      selectedStars: rating
+      selectedRating: rating,
     });
   }
 }
@@ -192,5 +290,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'red',
     fontWeight: 'bold'
-  }
+  },
+  reviewText: {
+    marginTop: 10,
+    width: 200,
+    height: 200,
+    textAlign: 'justify',
+    fontFamily: 'Monaco',
+    fontSize: 14,
+    color: '#35343D'
+  },
 });

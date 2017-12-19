@@ -21,7 +21,9 @@ import firebase from 'react-native-firebase';
 import StarRating from 'react-native-star-rating';
 import {Actions} from 'react-native-router-flux';
 import Globals from '../Globals';
-import DisplayView from './views/DisplayView';
+import {getCurrentUser} from '../Helpers';
+import {fetchDisplays} from '../FirebaseHelpers';
+import DisplayRatingView from './views/DisplayRatingView';
 
 type Display = {
   key: string,
@@ -39,13 +41,11 @@ type State = {
   displays: Array<Display>,
   refreshing: boolean,
   pageOfDisplays: number,
+  isFavorited: boolean,
 };
 
 // number of displays to load in one request to firebase
 const displaysPerPage = 10;
-
-// the firebase connection to the displays data set
-const displaysRef = firebase.database().ref('/' + Globals.FIREBASE_TBL_DISPLAYS);
 
 export default class Discover extends Component<Props, State> {
   constructor() {
@@ -54,29 +54,9 @@ export default class Discover extends Component<Props, State> {
       this.state = {
         displays: [],
         refreshing: true,
-        pageOfDisplays: 0
+        pageOfDisplays: 0,
+        isFavorited: false,
       };
-  }
-
-  // retrieving displays from the firebase data set
-  fetchDisplays() {
-      displaysRef
-        .limitToFirst((this.state.pageOfDisplays + 1) * displaysPerPage)
-        .on('value', (snap) => {
-          var items = [];
-          snap.forEach((child) => {
-            if (child.val().Images != null) {
-            items.push({
-              key: child.key,
-              title: child.key,
-              description: child.val().Description,
-              starCount: 4.6,
-              image: child.val().Images[0],
-            });
-          }
-        });
-        this.setState({displays: items, refreshing: false});
-    });
   }
 
   componentWillMount() {
@@ -85,7 +65,9 @@ export default class Discover extends Component<Props, State> {
         pageOfDisplays: 0
       },
       () => {
-        this.fetchDisplays();
+        fetchDisplays(this.state.pageOfDisplays, displaysPerPage, items => {
+          this.setState({displays: items, refreshing: false});
+        });
       }
     );
   }
@@ -96,7 +78,9 @@ export default class Discover extends Component<Props, State> {
         pageOfDisplays: this.state.pageOfDisplays+1
       },
       () => {
-        this.fetchDisplays();
+        fetchDisplays(this.state.pageOfDisplays, displaysPerPage, items => {
+          this.setState({displays: items, refreshing: false});
+        });
       }
     );
   }
@@ -115,9 +99,10 @@ export default class Discover extends Component<Props, State> {
 
           <Text style={styles.navigationTitle}>Discover</Text>
 
-          <TouchableOpacity style={styles.filterIcon}>
+          <View style={{width: 40}} />
+          {/* <TouchableOpacity style={styles.filterIcon}>
             <Image source={require('../img/filter_icon.png')} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <View style={styles.dataContainer}>
@@ -133,28 +118,54 @@ export default class Discover extends Component<Props, State> {
               <TouchableWithoutFeedback onPress={() => this.onDisplayPressed(item.key)}>
                 {/* <DisplayView item={item} style={styles.cardView} /> */}
                 <View style={styles.cardView}>
-                  <Image style={{width: '100%', height: 200, resizeMode: 'cover', marginBottom: 20}} source={{uri: item.image}} />
-                  <Text style={{marginLeft: 20, marginBottom: 5, fontSize: 17, fontFamily: 'Monaco'}}>{item.title}</Text>
-                  <View style={{marginLeft: 20, marginBottom: 20, flexDirection: 'row', alignItems: 'center'}}>
-                    <StarRating
-                      disabled={true}
-                      starStyle={{marginRight: 5}}
-                      starSize={10}
-                      emptyStar={require('../img/star_empty.png')}
-                      fullStar={item.starCount > 2.5 ? require('../img/star_full.png') : require('../img/star_full_orange.png')}
-                      halfStar={item.starCount > 2.5 ? require('../img/star_half.png') : require('../img/star_half_orange.png')}
-                      maxStars={5}
-                      rating={item.starCount}
-                      selectedStar={(rating) => this.onStarRatingPress(rating)}
-                    />
-                    <Text style={{marginLeft: 5, fontSize: 11, color: '#B2B1C1', fontFamily: 'Monaco'}}>{item.starCount} / 5.0 * 1.3 MI NEARBY</Text>
-                  </View>
+                  <Image style={{width: '100%', height: 200, resizeMode: 'cover'}} source={{uri: item.image}} />
+                  <TouchableOpacity style={{zIndex: 1, position: 'absolute', top: 0, right: 0}} onPress={() => this.toggleFavorite(item.key)}>
+                    <Image source={item.isFavorited ? require('../img/icon_favorite_filled.png') : require('../img/icon_favorite_unfilled.png')} />
+                  </TouchableOpacity>
+
+                  <DisplayRatingView item={item} />
                 </View>
               </TouchableWithoutFeedback>}
             />
           </View>
       </ImageBackground>
     );
+  }
+
+  isFavorited(displayKey: string) {
+    const favoriteRef = firebase.database().ref(
+      Globals.FIREBASE_TBL_USERS + '/' +
+      getCurrentUser().uid + '/' +
+      Globals.FIREBASE_TBL_USERS_FAVORITES + '/' + displayKey);
+
+    return (favoriteRef != null);
+  }
+
+  toggleFavorite(displayKey: string) {
+    let userId = getCurrentUser().uid;
+
+    const userFavoritesRef = firebase.database().ref(
+      Globals.FIREBASE_TBL_USERS + '/' +
+      userId + '/' +
+      Globals.FIREBASE_TBL_USERS_FAVORITES + '/' + displayKey);
+    const displayFavoritesRef = firebase.database().ref(
+      Globals.FIREBASE_TBL_DISPLAYS + '/' +
+      displayKey + '/' +
+      Globals.FIREBASE_TBL_USERS_FAVORITES + '/' + userId);
+
+    // check if display is already favorited by current user
+    displayFavoritesRef.once('value').then((snap) => {
+      // value is null, so display wasn't yet favorited by this user
+      if (!snap.val()) {
+        // mark display as favorite
+        userFavoritesRef.set(true);
+        displayFavoritesRef.set(true);
+      } else {
+        // remove display from user's favorite list
+        userFavoritesRef.remove();
+        displayFavoritesRef.remove();
+      }
+    });
   }
 
   onMenuPressed() {
@@ -193,7 +204,7 @@ const styles = StyleSheet.create({
   },
   filterIcon: {
     marginTop: 12,
-    marginRight: 22
+    marginRight: 22,
   },
   dataContainer: {
     flex: 1,

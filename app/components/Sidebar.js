@@ -110,12 +110,12 @@ export default class Sidebar extends Component {
               </View>
 
               <View style={styles.menuContainer}>
-                <Text style={styles.menuText}>
+                {/* <Text style={styles.menuText}>
                   Notifications
                 </Text>
                 <Text style={styles.menuText}>
                   Settings
-                </Text>
+                </Text> */}
 
                 <TouchableOpacity onPress={this.onLogoutButtonPressed}>
                   <Text style={styles.menuText}>

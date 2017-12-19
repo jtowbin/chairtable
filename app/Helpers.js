@@ -31,6 +31,28 @@ export async function tutorialIsViewed() {
   return tutorialIsViewed;
 }
 
+export function getCurrentUser() {
+  return firebase.auth().currentUser;
+}
+
+export function formatToOneDecimal(value: number): string {
+  var rounded = Math.round( value * 10 ) / 10;
+  return rounded.toFixed(1);
+}
+
+// calculate average rating
+export function calculateAverageRating(ratings: [number]): number {
+  let avgRating = 0;
+  if (ratings.length) {
+    let reviewsSum = ratings.reduce((total, num) => {
+      return total + num;
+    });
+    avgRating = reviewsSum / ratings.length;
+  }
+
+  return avgRating;
+}
+
 export function fbAuth() {
   LoginManager.logInWithReadPermissions(['public_profile', 'email']).then(function(result) {
        if (result.isCancelled) {
@@ -45,7 +67,8 @@ export function fbAuth() {
                    if (error) {
                       console.log(error)
                    } else {
-                      firebase.database().ref('users/' + result.id).set({
+                     // console.log(firebase.auth().currentUser);
+                      firebase.database().ref('users/' + getCurrentUser().uid).set({
                         email:            result.email,
                         first_name:       result.first_name,
                         last_name:        result.last_name,
