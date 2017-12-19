@@ -41,6 +41,7 @@ type Display = {
   description: string,
   starCount: number,
   image: string,
+  address: string,
 };
 
 type Props = {
@@ -101,9 +102,18 @@ export default class DisplayDetail extends Component<Props, State> {
   getDisplayView() {
     return (<View style={{flex: 1, backgroundColor: 'white'}}>
       <View style={styles.cardView}>
-        <Image style={{width: '100%', height: 200, resizeMode: 'cover'}} source={{uri: this.state.display.image}} />
+        <Image
+          style={{width: '100%', height: 200, resizeMode: 'cover'}}
+          source={{
+            uri: this.state.display.image,
+            cache: 'force-cache'
+          }} />
 
-        <DisplayRatingView item={this.state.display} />
+        <DisplayRatingView
+          item={this.state.display}
+          margin={20} />
+
+          <Text style={{marginLeft: 20, marginRight: 20, marginBottom: 20}}>{this.state.display.address}</Text>
 
       </View>
 
@@ -118,7 +128,12 @@ export default class DisplayDetail extends Component<Props, State> {
         ListHeaderComponent={this.renderHeader}
         renderItem={({item}) =>
           <View style={{flexDirection: 'row'}}>
-            <Image style={{margin: 20, width: 50, height: 50, borderRadius: 25}} source={{uri: item.userPhoto}} />
+            <Image
+              style={{margin: 20, width: 50, height: 50, borderRadius: 25}}
+              source={{
+                uri: item.userPhoto,
+                cache: 'force-cache'
+              }} />
             <View style={{flex: 1, marginTop: 25, marginBottom: 10, flexDirection: 'column'}}>
               <Text style={{marginBottom: 5, fontWeight: 'bold', fontSize: 16}}>{item.userName}</Text>
 
@@ -128,7 +143,7 @@ export default class DisplayDetail extends Component<Props, State> {
 
               <Text style={{marginTop: 20, fontFamily: 'Monaco', fontSize: 14}}>{item.review}</Text>
 
-              <View style={{alignItems: 'flex-end', marginRight: 10}}>
+              <View style={{alignItems: 'flex-end', marginTop: 10, marginRight: 10}}>
                 <TimeAgo time={item.date} />
               </View>
             </View>
@@ -138,7 +153,9 @@ export default class DisplayDetail extends Component<Props, State> {
       {/* the review popup */}
       <PopupDialog
         width={300}
+        heigh={300}
         ref={(popupDialog) => { this.popupDialog = popupDialog; }}
+        dismissOnTouchOutside={false}
         actions={[
           <View
             style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end'}}
@@ -181,7 +198,10 @@ export default class DisplayDetail extends Component<Props, State> {
             onChangeText={(text) => this.setState({reviewText: text})}
             value={this.state.reviewText}
             multiline={true}
-            maxLength={140}
+            blurOnSubmit={true}
+            autoGrow={true}
+            maxHeight={200}
+            maxLength={Globals.REVIEW_MAX_CHAR_LENGTH}
             placeholder='Example: An amazing display of Christmas lights. Very family oriented. Santa and Rudolph are there to have pictures taken with the children.'
           />
         </View>
@@ -297,7 +317,7 @@ const styles = StyleSheet.create({
     height: 200,
     textAlign: 'justify',
     fontFamily: 'Monaco',
-    fontSize: 14,
+    fontSize: 13,
     color: '#35343D'
   },
 });

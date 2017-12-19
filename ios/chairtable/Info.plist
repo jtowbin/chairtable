@@ -34,7 +34,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>7</string>
+	<string>9</string>
 	<key>FacebookAppID</key>
 	<string>542195376126738</string>
 	<key>FacebookDisplayName</key>
@@ -70,10 +70,16 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera will be accessed</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>NSMainNibFile</key>
 	<string>LaunchScreen</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Photo library access is needed</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library access is needed</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>FontAwesome.ttf</string>
@@ -97,11 +103,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-  <key>NSCameraUsageDescription</key>
-  <string>Camera will be accessed</string>
-  <key>NSPhotoLibraryUsageDescription</key>
-  <string>Photo library access is needed</string>
-  <key>NSPhotoLibraryAddUsageDescription</key>
-  <string>Photo library access is needed</string>
 </dict>
 </plist>

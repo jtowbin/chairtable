@@ -7,6 +7,8 @@ import FBSDK, { LoginButton, LoginManager, AccessToken, GraphRequest, GraphReque
 import firebase from 'react-native-firebase';
 import {Actions} from 'react-native-router-flux';
 
+import {userExists} from './FirebaseHelpers';
+
 export async function markTutorialAsViewed() {
   try {
     await AsyncStorage.setItem(STORAGE_KEY_TUTORIAL_IS_VIEWED, '1');
@@ -67,21 +69,27 @@ export function fbAuth() {
                    if (error) {
                       console.log(error)
                    } else {
-                     // console.log(firebase.auth().currentUser);
-                      firebase.database().ref('users/' + getCurrentUser().uid).set({
-                        email:            result.email,
-                        first_name:       result.first_name,
-                        last_name:        result.last_name,
-                        profile_picture:  result.picture.data.url
-                      });
+                     // check if user exists (so we won't create it again in firebase)
+                     userExists(getCurrentUser().uid, userExists => {
+                       console.log('user exists: '+userExists);
+                       if (!userExists) {
+                         // create user
+                         firebase.database().ref('users/' + getCurrentUser().uid).set({
+                           email:            result.email,
+                           first_name:       result.first_name,
+                           last_name:        result.last_name,
+                           profile_picture:  result.picture.data.url
+                         });
+                       }
 
-                      // mark tutorial as viewed (if user goes to facebook login directly from tutorial)
-                      AsyncStorage.setItem(Globals.STORAGE_KEY_TUTORIAL_IS_VIEWED, "1");
+                       // mark tutorial as viewed (if user goes to facebook login directly from tutorial)
+                       AsyncStorage.setItem(Globals.STORAGE_KEY_TUTORIAL_IS_VIEWED, "1");
 
-                      // mark user as logged in
-                      AsyncStorage.setItem(Globals.STORAGE_KEY_LOGGED_IN, "1");
+                       // mark user as logged in
+                       AsyncStorage.setItem(Globals.STORAGE_KEY_LOGGED_IN, "1");
 
-                      return Actions.main({type: 'reset'})
+                       return Actions.main({type: 'reset'})
+                     });
                    }
                 }
 

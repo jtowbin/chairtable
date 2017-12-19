@@ -24,6 +24,7 @@ import Globals from '../Globals';
 import {getCurrentUser} from '../Helpers';
 import {fetchDisplays} from '../FirebaseHelpers';
 import DisplayRatingView from './views/DisplayRatingView';
+import DisplayView from './views/DisplayView';
 
 type Display = {
   key: string,
@@ -73,6 +74,7 @@ export default class Discover extends Component<Props, State> {
   }
 
   loadMoreMessages () {
+    console.log('load more');
     this.setState(
       {
         pageOfDisplays: this.state.pageOfDisplays+1
@@ -116,14 +118,8 @@ export default class Discover extends Component<Props, State> {
             keyExtractor={item => item.key}
             renderItem={({item}) =>
               <TouchableWithoutFeedback onPress={() => this.onDisplayPressed(item.key)}>
-                {/* <DisplayView item={item} style={styles.cardView} /> */}
-                <View style={styles.cardView}>
-                  <Image style={{width: '100%', height: 200, resizeMode: 'cover'}} source={{uri: item.image}} />
-                  <TouchableOpacity style={{zIndex: 1, position: 'absolute', top: 0, right: 0}} onPress={() => this.toggleFavorite(item.key)}>
-                    <Image source={item.isFavorited ? require('../img/icon_favorite_filled.png') : require('../img/icon_favorite_unfilled.png')} />
-                  </TouchableOpacity>
-
-                  <DisplayRatingView item={item} />
+                <View>
+                  <DisplayView item={item} style={styles.cardView} />
                 </View>
               </TouchableWithoutFeedback>}
             />
@@ -139,33 +135,6 @@ export default class Discover extends Component<Props, State> {
       Globals.FIREBASE_TBL_USERS_FAVORITES + '/' + displayKey);
 
     return (favoriteRef != null);
-  }
-
-  toggleFavorite(displayKey: string) {
-    let userId = getCurrentUser().uid;
-
-    const userFavoritesRef = firebase.database().ref(
-      Globals.FIREBASE_TBL_USERS + '/' +
-      userId + '/' +
-      Globals.FIREBASE_TBL_USERS_FAVORITES + '/' + displayKey);
-    const displayFavoritesRef = firebase.database().ref(
-      Globals.FIREBASE_TBL_DISPLAYS + '/' +
-      displayKey + '/' +
-      Globals.FIREBASE_TBL_USERS_FAVORITES + '/' + userId);
-
-    // check if display is already favorited by current user
-    displayFavoritesRef.once('value').then((snap) => {
-      // value is null, so display wasn't yet favorited by this user
-      if (!snap.val()) {
-        // mark display as favorite
-        userFavoritesRef.set(true);
-        displayFavoritesRef.set(true);
-      } else {
-        // remove display from user's favorite list
-        userFavoritesRef.remove();
-        displayFavoritesRef.remove();
-      }
-    });
   }
 
   onMenuPressed() {

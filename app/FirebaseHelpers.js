@@ -23,7 +23,6 @@ export function fetchDisplays(page: number, perPage: number, callback) {
         var items = [];
         snap.forEach((child) => {
           if (child.val().Images != null) {
-            console.log(child.val().favorites && child.val().favorites[getCurrentUser().uid]);
             var isFavorited = (child.val().favorites && child.val().favorites[getCurrentUser().uid] == true);
 
             let avgRating = 0;
@@ -38,6 +37,9 @@ export function fetchDisplays(page: number, perPage: number, callback) {
               description: child.val().Description,
               starCount: avgRating,
               image: child.val().Images[0],
+              latitude: child.val().Latitude,
+              longitude: child.val().Longitude,
+              address: child.val().Address,
               isFavorited: isFavorited
             });
           }
@@ -57,6 +59,8 @@ export function fetchDisplays(page: number, perPage: number, callback) {
 export function fetchDisplay(displayKey: string, callback) {
   firebaseRef.child(Globals.FIREBASE_TBL_DISPLAYS).child(displayKey)
     .on('value', (snap) => {
+      var isFavorited = (snap.val().favorites && snap.val().favorites[getCurrentUser().uid] == true);
+
       let avgRating = 0;
       if (snap.val().user_reviews) {
         let reviews = Object.values(snap.val().user_reviews);
@@ -68,10 +72,90 @@ export function fetchDisplay(displayKey: string, callback) {
         description: snap.val().Description,
         starCount: avgRating,
         image: snap.val().Images[0],
+        latitude: snap.val().Latitude,
+        longitude: snap.val().Longitude,
+        address: snap.val().Address,
+        isFavorited: isFavorited
       };
 
       callback(item);
     });
+}
+
+// load user's favorited displays
+export function loadFavoriteDisplays(userKey: string, callback) {
+  const favoriteDisplaysRef = firebaseRef
+    .child(Globals.FIREBASE_TBL_USERS)
+    .child(userKey)
+    .child(Globals.FIREBASE_TBL_USERS_FAVORITES);
+
+  // get list of favorited display ids for logged in user
+  favoriteDisplaysRef.on('value', snapshot => {
+    console.log(snapshot);
+    if (snapshot.val() != null) {
+      var displayIds = Object.keys(snapshot.val());
+
+      // get details of all displays
+      Promise.all(
+        displayIds.map(id => {
+          console.log('send request '+id);
+          return firebase.database().ref(Globals.FIREBASE_TBL_DISPLAYS).child(id).once('value')
+                    .then(snapshot => {
+                      console.log('got response '+id);
+                      return snapshot;
+                    })
+        })
+      ).then(r => {
+        var items = [];
+        r.forEach(snap => {
+          let avgRating = 0;
+          if (snap.val().user_reviews) {
+            let reviews = Object.values(snap.val().user_reviews);
+            avgRating = calculateAverageRating(reviews);
+          }
+
+          items.push({
+            key: snap.key,
+            title: snap.val().Title,
+            starCount: avgRating,
+            image: snap.val().Images[0]
+          });
+        });
+
+        callback(items);
+      })
+      .catch((error) => console.log(error));
+    }
+  });
+}
+
+export function toggleFavorite(userKey: string, displayKey: string, callback) {
+  const userFavoritesRef = firebase.database().ref(
+    Globals.FIREBASE_TBL_USERS + '/' +
+    userKey + '/' +
+    Globals.FIREBASE_TBL_USERS_FAVORITES + '/' + displayKey);
+  const displayFavoritesRef = firebase.database().ref(
+    Globals.FIREBASE_TBL_DISPLAYS + '/' +
+    displayKey + '/' +
+    Globals.FIREBASE_TBL_USERS_FAVORITES + '/' + userKey);
+
+  // check if display is already favorited by current user
+  displayFavoritesRef.once('value').then((snap) => {
+    // value is null, so display wasn't yet favorited by this user
+    if (!snap.val()) {
+      // mark display as favorite
+      userFavoritesRef.set(true);
+      displayFavoritesRef.set(true);
+
+      callback(true);
+    } else {
+      // remove display from user's favorite list
+      userFavoritesRef.remove();
+      displayFavoritesRef.remove();
+
+      callback(false);
+    }
+  });
 }
 
 // retrieve user's feedback on a display
@@ -93,7 +177,6 @@ export function fetchRatingsForDisplay(displayKey: string, callback) {
     .orderByChild('displayKey')
     .equalTo(displayKey)
     .on('value', (snap) => {
-      console.log(snap.val());
       if (snap.val()) {
         let reviews = Object.values(snap.val());
 
@@ -141,16 +224,26 @@ export function updateRating(displayKey: string, userKey: number, rating: number
   //   .child(userKey)
   //   .child(Globals.FIREBASE_TBL_REVIEWS)
   //   .child(reviewKey);
+  // userReviewsRef.set(true);
 
   // adding the rating to current display
-  let displayReviewsRef = firebaseRef.ref()
+  let displayReviewsRef = firebaseRef
     .child(Globals.FIREBASE_TBL_DISPLAYS)
     .child(displayKey)
     .child(Globals.FIREBASE_TBL_REVIEWS)
     .child(reviewKey);
 
-  // userReviewsRef.set(true);
   displayReviewsRef.set(rating);
 
   callback();
+}
+
+export function userExists(userKey: string, callback) {
+  firebaseRef
+    .child(Globals.FIREBASE_TBL_USERS)
+    .child(userKey)
+    .on('value', (snap) => {
+      let userExists = (snap.val() != null);
+      callback(userExists);
+    });
 }

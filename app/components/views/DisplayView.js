@@ -16,6 +16,9 @@ import {
 } from 'react-native';
 
 import StarRating from 'react-native-star-rating';
+import DisplayRatingView from './DisplayRatingView';
+import {getCurrentUser} from '../../Helpers';
+import {toggleFavorite, fetchDisplay} from '../../FirebaseHelpers';
 
 type Display = {
   title: string,
@@ -26,36 +29,45 @@ type Display = {
 
 type Props = {
   item: Display,
+  ratingComponentMargin?: number,
 };
 
 type State = {};
 
 export default class DisplayView extends Component<Props, State> {
+  static defaultProps = {
+    item: null,
+    ratingComponentMargin: 20
+  };
+
   constructor(props: Props) {
     super(props);
   }
 
   render() {
     return (
-        <View style={styles.cardView}>
-          <Image style={{width: '100%', height: 200, resizeMode: 'cover', marginBottom: 20}} source={{uri: this.props.item.image}} />
-          <Text style={{marginLeft: 20, marginBottom: 5, fontSize: 17, fontFamily: 'Monaco'}}>{this.props.item.title}</Text>
-          <View style={{marginLeft: 20, marginBottom: 20, flexDirection: 'row', alignItems: 'center'}}>
-            <StarRating
-              disabled={true}
-              starStyle={{marginRight: 5}}
-              starSize={10}
-              emptyStar={require('../../img/star_empty.png')}
-              fullStar={this.props.item.starCount > 2.5 ? require('../../img/star_full.png') : require('../../img/star_full_orange.png')}
-              halfStar={this.props.item.starCount > 2.5 ? require('../../img/star_half.png') : require('../../img/star_half_orange.png')}
-              maxStars={5}
-              rating={this.props.item.starCount}
-              selectedStar={(rating) => this.onStarRatingPress(rating)}
-            />
-            <Text style={{marginLeft: 5, fontSize: 11, color: '#B2B1C1', fontFamily: 'Monaco'}}>{this.props.item.starCount} / 5.0 * 1.3 MI NEARBY</Text>
-          </View>
-        </View>
+      <View style={[styles.cardView, this.props.displayStyle]}>
+        <Image
+          style={{width: '100%', height: 200, resizeMode: 'cover'}}
+          source={{
+            uri: this.props.item.image,
+            cache: 'force-cache',
+          }} />
+        <TouchableOpacity style={{zIndex: 1, position: 'absolute', top: 0, right: 0}} onPress={() => this.toggleFavoritePressed(this.props.item.key)}>
+          <Image source={this.props.item.isFavorited ? require('../../img/icon_favorite_filled.png') : require('../../img/icon_favorite_unfilled.png')} />
+        </TouchableOpacity>
+
+        <DisplayRatingView
+          margin={this.props.ratingComponentMargin}
+          item={this.props.item} />
+      </View>
     );
+  }
+
+  toggleFavoritePressed(displayKey: string) {
+    let userId = getCurrentUser().uid;
+
+    toggleFavorite(userId, displayKey, isFavorited => {});
   }
 
   onMenuPressed() {
@@ -64,15 +76,6 @@ export default class DisplayView extends Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'transparent'
-  },
-  dataContainer: {
-    flex: 1,
-    justifyContent: 'center',
-  },
   cardView: {
     marginLeft: 20,
     marginRight: 20,

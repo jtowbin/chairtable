@@ -27,6 +27,7 @@ type Display = {
 
 type Props = {
   item: Display,
+  margin: number,
 };
 
 type State = {};
@@ -38,7 +39,7 @@ export default class DisplayRatingView extends Component<Props, State> {
 
   render() {
     return (
-      <View style={{margin: 20}}>
+      <View style={{margin: this.props.margin}}>
         <Text numberOfLines={1} style={{fontSize: 17, fontFamily: 'Monaco'}}>{this.props.item.title}</Text>
 
         { this.props.item.starCount > 0 && this.renderDisplayRating(this.props.item) }

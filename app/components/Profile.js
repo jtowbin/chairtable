@@ -22,7 +22,9 @@ import {Actions} from 'react-native-router-flux';
 import StarRating from 'react-native-star-rating';
 import GridView from 'react-native-super-grid';
 
+import RatingView from './views/RatingView';
 import {getCurrentUser} from '../Helpers';
+import {loadFavoriteDisplays} from '../FirebaseHelpers';
 import Globals from '../Globals';
 
 type Display = {
@@ -65,19 +67,7 @@ export default class Profile extends Component<Props, State> {
   }
 
   componentWillMount() {
-    this.loadFavoriteDisplays((result) => {
-      console.log(result);
-
-      var items = [];
-      result.forEach(snap => {
-        items.push({
-          key: snap.key,
-          title: snap.val().Title,
-          starCount: 4.6,
-          image: snap.val().Images[0]
-        });
-      });
-
+    loadFavoriteDisplays(getCurrentUser().uid, items => {
       this.setState({displays: items, refreshing: false});
     });
   }
@@ -130,7 +120,7 @@ export default class Profile extends Component<Props, State> {
 
             {/* the list */}
             <FlatList
-              style={{paddingLeft: listMarginSize, paddingRight: listMarginSize, paddingTop: listMarginSize, backgroundColor: '#f6f6f9'}}
+              style={{paddingLeft: listMarginSize, paddingRight: listMarginSize, backgroundColor: '#f6f6f9'}}
               showsVerticalScrollIndicator={false}
               // refreshing={this.state.refreshing}
               data={this.state.displays}
@@ -139,26 +129,16 @@ export default class Profile extends Component<Props, State> {
               // onEndReachedThreshold={0}
               keyExtractor={item => item.key}
               ItemSeparatorComponent={this.renderSeparator}
+              ListHeaderComponent={this.renderHeader}
+              ListFooterComponent={this.renderHeader}
               renderItem={({item}) =>
                 <TouchableWithoutFeedback onPress={() => this.onDisplayPressed(item.key)}>
                   {/* <DisplayView item={item} style={styles.cardView} /> */}
                   <View style={styles.cardView}>
                     <Image style={{width: '100%', height: 160, resizeMode: 'cover'}} source={{uri: item.image}} />
                     <View style={{margin: 14}}>
-                      <Text numberOfLines={1} style={{marginBottom: 5, fontSize: 14, fontFamily: 'Monaco'}}>{item.title}</Text>
-                      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                        <StarRating
-                          disabled={true}
-                          starStyle={{marginRight: 5}}
-                          starSize={10}
-                          emptyStar={require('../img/star_empty.png')}
-                          fullStar={item.starCount > 2.5 ? require('../img/star_full.png') : require('../img/star_full_orange.png')}
-                          halfStar={item.starCount > 2.5 ? require('../img/star_half.png') : require('../img/star_half_orange.png')}
-                          maxStars={5}
-                          rating={item.starCount}
-                        />
-                        <Text style={{marginLeft: 3, fontSize: 11, color: '#B2B1C1', fontFamily: 'Monaco'}}>{item.starCount}/5.0</Text>
-                      </View>
+                      <Text numberOfLines={1} style={{fontSize: 14, fontFamily: 'Monaco'}}>{item.title}</Text>
+                      { item.starCount > 0 && <RatingView rating={item.starCount} /> }
                     </View>
                   </View>
                 </TouchableWithoutFeedback>}
@@ -175,32 +155,10 @@ export default class Profile extends Component<Props, State> {
     );
   }
 
-  loadFavoriteDisplays(callback) {
-    const favoriteDisplaysRef = firebase.database().ref(
-      Globals.FIREBASE_TBL_USERS + '/' +
-      getCurrentUser().uid + '/' +
-      Globals.FIREBASE_TBL_USERS_FAVORITES);
-
-      // get list of favorited display ids for logged in user
-      favoriteDisplaysRef.on('value', snapshot => {
-        if (snapshot.val() != null) {
-          var displayIds = Object.keys(snapshot.val());
-
-          // get details of all displays
-          Promise.all(
-            displayIds.map(id => {
-              console.log('send request '+id);
-              return firebase.database().ref(Globals.FIREBASE_TBL_DISPLAYS).child(id).once('value')
-                        .then(snapshot => {
-                          console.log('got response '+id);
-                          return snapshot;
-                        })
-            })
-          ).then(r => callback(r))
-          .catch((error) => console.log(error));
-        }
-      });
-
+  renderHeader = () => {
+    return (
+      <View style={{height: listMarginSize}} />
+    );
   }
 
   onMenuPressed() {
@@ -256,7 +214,6 @@ const styles = StyleSheet.create({
     width: equalWidth - listSeparatorSize - listMarginSize,
     marginLeft: listSeparatorSize/2,
     marginRight: listSeparatorSize/2,
-    marginTop: 4,
     flexDirection: 'column',
     backgroundColor: 'white',
     shadowColor: 'black',

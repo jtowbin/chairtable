@@ -13,6 +13,7 @@ import {
   Image,
   View,
   TouchableOpacity,
+  ViewPropTypes
 } from 'react-native';
 
 import StarRating from 'react-native-star-rating';
@@ -20,12 +21,18 @@ import {formatToOneDecimal} from '../../Helpers';
 
 type Props = {
   rating: number,
-  shouldHideText: boolean,
+  shouldHideText?: boolean,
+  ratingTextStyle?: ViewPropTypes.style
 };
 
 type State = {};
 
 export default class RatingView extends Component<Props, State> {
+  static defaultProps = {
+    shouldHideText: false,
+    ratingTextStyle: {}
+  };
+
   constructor(props: Props) {
     super(props);
   }
@@ -55,7 +62,7 @@ export default class RatingView extends Component<Props, State> {
 
   renderRatingText(formattedRating: string) {
     return (
-      <Text style={{marginLeft: 5, fontSize: 11, color: '#B2B1C1', fontFamily: 'Monaco'}}>{formattedRating}/5.0</Text>
+      <Text style={[styles.ratingText, this.props.ratingTextStyle]}>{formattedRating}/5.0</Text>
     );
   }
 }
@@ -81,5 +88,12 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.4,
     shadowRadius: 3
+  },
+  ratingText: {
+    marginLeft: 5,
+    fontSize: 11,
+    color: '#B2B1C1',
+    fontFamily: 'Monaco',
+    backgroundColor: 'transparent'
   }
 });
