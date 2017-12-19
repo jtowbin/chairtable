@@ -91,7 +91,7 @@ export default class DisplayDetail extends Component<Props, State> {
       <View style={styles.container}>
 
         <TouchableOpacity style={styles.backIcon} onPress={this.onBackPressed}>
-          <Image source={require('../img/back_icon.png')} />
+          <Image style={{width: 40, height: 40}} source={require('../img/back_icon.png')} />
         </TouchableOpacity>
 
         { this.state.display && this.getDisplayView() }
@@ -294,8 +294,8 @@ const styles = StyleSheet.create({
   backIcon: {
     position: 'absolute',
     zIndex: 1,
-    top: 32,
-    left: 22
+    top: 22,
+    left: 12
   },
   cardView: {
     flexDirection: 'column',

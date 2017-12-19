@@ -88,29 +88,31 @@ export default class Map extends Component<{}> {
             backgroundColor: 'transparent',
             alignItems: 'center'
           }}>
-          <TouchableWithoutFeedback onPress={this.onCloseDisplayPressed.bind(this)}>
-            <Image
-              style={{
-                position: 'absolute',
-                zIndex: 1,
-                top: -10,
-                left: 7,
-                width: 25,
-                height: 25
-              }}
-              source={require('../img/icon_close.png')} />
-            </TouchableWithoutFeedback>
+
+            <View>
+              <TouchableWithoutFeedback onPress={this.onCloseDisplayPressed.bind(this)}>
+                <Image
+                  style={{
+                    position: 'absolute',
+                    zIndex: 1,
+                    top: -10,
+                    left: -5,
+                    width: 25,
+                    height: 25
+                  }}
+                  source={require('../img/icon_close.png')} />
+              </TouchableWithoutFeedback>
             <TouchableWithoutFeedback
                onPress={() => this.onDisplayPressed(this.state.selectedDisplay.key)}>
 
-              <View style={{width: '90%', marginBottom: 10}}>
+              <View style={{marginLeft: 10, marginRight: 10, marginBottom: 10}}>
                 <View style={styles.cardView}>
                   <ImageBackground
                     source={{
                       uri: this.state.selectedDisplay.image,
                       cache: 'force-cache',
                     }}
-                    style={{height: 173}}>
+                    style={{height: 173, backgroundColor: 'black'}}>
 
                     <Text numberOfLines={1} style={{
                       fontSize: 21,
@@ -142,6 +144,7 @@ export default class Map extends Component<{}> {
               </View>
 
             </TouchableWithoutFeedback>
+            </View>
           </View>
         }
       </View>
@@ -265,10 +268,6 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.6 }],
   },
   cardView: {
-    marginLeft: 0,
-    marginRight: 0,
-    marginBottom: 0,
-    marginTop: 0,
     flexDirection: 'column',
     backgroundColor: 'white',
     shadowColor: 'black',
