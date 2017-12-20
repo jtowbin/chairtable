@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key></key>
-	<string></string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -34,7 +32,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>11</string>
+	<string>12</string>
 	<key>FacebookAppID</key>
 	<string>542195376126738</string>
 	<key>FacebookDisplayName</key>
@@ -74,6 +72,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera will be accessed</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Rudolf needs your location to help you quickly find and discover displays nearby</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>NSMainNibFile</key>

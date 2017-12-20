@@ -46,7 +46,7 @@ export default class Map extends Component<{}> {
   }
 
   componentWillMount() {
-    fetchDisplays(1, 500, (items) => {
+    fetchDisplays(1, 50, (items) => {
       this.setState({displays: items});
     });
   }
@@ -59,10 +59,11 @@ export default class Map extends Component<{}> {
             styleURL={Mapbox.StyleURL.Dark}
             zoomLevel={10}
             zoomEnabled={true}
-            centerCoordinate={[-118.243683, 34.052235]}
+            // centerCoordinate={[-118.243683, 34.052235]}
             style={styles.mapbox}
             showUserLocation={true}
-            userTrackingMode={2}>
+            userTrackingMode={Mapbox.UserTrackingModes.Follow}
+            >
             {this.renderAnnotations()}
         </Mapbox.MapView>
 
