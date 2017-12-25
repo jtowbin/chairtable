@@ -14,10 +14,12 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   ImageBackground,
-  Animated
+  Animated,
+  Alert
 } from 'react-native';
 
 import firebase from 'react-native-firebase';
+import GeoFire from 'geofire';
 import Mapbox from '@mapbox/react-native-mapbox-gl';
 import Globals from '../Globals.js';
 import {Actions} from 'react-native-router-flux';
@@ -25,59 +27,243 @@ import {Actions} from 'react-native-router-flux';
 import RatingView from './views/RatingView';
 
 import {fetchDisplays, fetchDisplay, toggleFavorite} from '../FirebaseHelpers';
-import {getCurrentUser} from '../Helpers';
+import {getCurrentUser, convertMapboxCoordinates} from '../Helpers';
+// import { feature } from '@turf/helpers';
+
+import turf from 'turf';
+import debounce from 'debounce';
+import GeoViewport from '@mapbox/geo-viewport';
 
 // the firebase connection to the displays data set
 const displaysRef = firebase.database().ref('/' + Globals.FIREBASE_TBL_DISPLAYS);
 
+// the GeoFire table that stores displays locations (used for radius search)
+const geofireDisplaysRef = firebase.database().ref(Globals.FIREBASE_TBL_DISPLAYS_LOCATIONS);
+const geofireRef = new GeoFire(geofireDisplaysRef);
+
 Mapbox.setAccessToken(Globals.MAPBOX_ACCESS_TOKEN);
+
+const layerStyles = Mapbox
+  .StyleSheet
+  .create({
+    singlePoint: {
+      circleColor: 'green',
+      circleOpacity: 0.84,
+      circleStrokeWidth: 2,
+      circleStrokeColor: 'white',
+      circleRadius: 5,
+      circlePitchAlignment: Mapbox.CirclePitchAlignment.Map
+    },
+
+    clusteredPoints: {
+      circlePitchAlignment: Mapbox.CirclePitchAlignment.Map,
+      circleColor: Mapbox
+        .StyleSheet
+        .source([
+          [
+            25, 'yellow'
+          ],
+          [
+            50, 'red'
+          ],
+          [
+            75, 'blue'
+          ],
+          [
+            100, 'orange'
+          ],
+          [
+            300, 'pink'
+          ],
+          [750, 'white']
+        ], 'point_count', Mapbox.InterpolationMode.Exponential),
+
+      circleRadius: Mapbox
+        .StyleSheet
+        .source([
+          [
+            0, 15
+          ],
+          [
+            100, 20
+          ],
+          [750, 30]
+        ], 'point_count', Mapbox.InterpolationMode.Exponential),
+
+      circleOpacity: 0.84,
+      circleStrokeWidth: 2,
+      circleStrokeColor: 'white'
+    },
+
+    clusterCount: {
+      textField: '{point_count}',
+      textSize: 12,
+      textPitchAlignment: Mapbox.TextPitchAlignment.Map
+    }
+  });
 
 export default class Map extends Component<{}> {
 
   constructor(props) {
     super(props);
 
+    this.searchRadius = 5;
+    this.nearbyItems = [];
+
     this.state = {
-      displays: [],
+      source: null,
+      // nearbyItems: [],
       selectedDisplay: null,
-      activeAnnotationIndex: -1,
-      previousActiveAnnotationIndex: -1,
+      // activeAnnotationIndex: -1,
+      // previousActiveAnnotationIndex: -1,
     };
   }
 
+  createMapFeature(location, displayKey) {
+    return {
+      type : 'Feature',
+      id : displayKey,
+      properties : {
+        displayKey: displayKey,
+      },
+      geometry : {
+        type: 'Point',
+        coordinates: convertMapboxCoordinates(location)
+      }
+    };
+  }
+
+  handleRegionDidChange(region) {
+    let center = convertMapboxCoordinates(region.geometry.coordinates);
+    let bounds = region.properties.visibleBounds;
+
+    let radius = turf.distance(
+        turf.point([bounds[1][1], bounds[1][0]]),
+        turf.point([bounds[0][1], bounds[0][0]])
+    );
+
+    if (this.geoQuery == null) {
+      // if we have no geo query yet, create a new one
+      this.geoQuery = geofireRef.query({
+        center: center,
+        radius: radius
+      });
+
+      this.attachGeoQueryCallbacks();
+    } else {
+      // just update the existing geo query
+      this.geoQuery.updateCriteria({
+        center: center,
+        radius: radius
+      });
+    }
+  }
+
   componentWillMount() {
-    fetchDisplays(1, 50, (items) => {
-      this.setState({displays: items});
-    });
+    // fetchDisplays(1, 50, (items) => {
+    //   this.setState({displays: items});
+    // });
+  }
+
+  attachGeoQueryCallbacks() {
+    var onKeyEnteredRegistration = this.geoQuery.on("key_entered", (key, location, distance) => {
+        this.nearbyItems.push({
+          displayKey: key,
+          distance : distance,
+          location : location,
+        });
+      });
+
+    var onKeyExitedRegistration = this.geoQuery.on("key_exited", (key, location, distance) => {
+        let index = this.nearbyItems.findIndex(value => value['displayKey'] == key);
+        if (index > -1) {
+          this.nearbyItems.splice(index, 1);
+        }
+      });
+
+    var onReadyRegistration = this.geoQuery.on("ready", () => {
+        var features = [];
+
+        this.nearbyItems.forEach(item => {
+          features.push(this.createMapFeature(item.location, item.displayKey));
+        });
+
+        var source = {
+          type: 'FeatureCollection',
+          features: features,
+        };
+
+        this.setState({
+          source: source,
+        });
+
+        // sort found displays by distance
+        // this
+        //   .foundDisplayKeys
+        //   .sort((item1, item2) => {
+        //     let distance1 = Object.values(item1)[0];
+        //     let distance2 = Object.values(item2)[0];
+
+        //     return parseFloat(distance1) - parseFloat(distance2);
+        //   });
+      });
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <Mapbox.MapView
-            ref={(c) => {this._map = c}}
+        { <Mapbox.MapView
+            ref={(c) => {this.map = c}}
             styleURL={Mapbox.StyleURL.Dark}
-            zoomLevel={10}
+            zoomLevel={Globals.MAP_DEFAULT_ZOOM_LEVEL}
             zoomEnabled={true}
-            // centerCoordinate={[-118.243683, 34.052235]}
             style={styles.mapbox}
             showUserLocation={true}
             userTrackingMode={Mapbox.UserTrackingModes.Follow}
+            onRegionDidChange={debounce(this.handleRegionDidChange.bind(this), 200)}
             >
-            {this.renderAnnotations()}
-        </Mapbox.MapView>
+            {/*this.renderAnnotations()*/}
+
+            { this.state.source &&
+              <Mapbox.ShapeSource
+                id = 'earthquakes'
+                cluster
+                clusterRadius = {50}
+                clusterMaxZoom = {14}
+                shape = {this.state.source}
+                onPress = {(e) => this.onShapePressed(e)}>
+
+                <Mapbox.SymbolLayer
+                  id='pointCount'
+                  style={layerStyles.clusterCount} />
+
+                <Mapbox.CircleLayer
+                  id = 'clusteredPoints'
+                  belowLayerID = 'pointCount'
+                  filter = {
+                    ['has', 'point_count']
+                  }
+                  style = {layerStyles.clusteredPoints} />
+
+                <Mapbox.CircleLayer
+                  id='singlePoint'
+                  filter={['!has', 'point_count']}
+                  style={layerStyles.singlePoint} />
+
+              </Mapbox.ShapeSource> }
+        </Mapbox.MapView> }
 
         <TouchableOpacity style={styles.menuIcon} onPress={this.onMenuPressed}>
           <Image source={require('../img/menu_icon.png')} />
         </TouchableOpacity>
 
-        {/* <TouchableOpacity style={styles.addDisplayIcon} onPress={this.onCreateDisplayPressed}>
-          <Image source={require('../img/icon_add_display.png')} />
-        </TouchableOpacity> */}
+        { <TouchableOpacity style={styles.addDisplayIcon} onPress={this.onCreateDisplayPressed}>
+          <Image style={{width: 60, height: 60}} source={require('../img/icon_add_display.png')} />
+        </TouchableOpacity> }
 
-        {/* <TouchableOpacity style={styles.addDisplayIcon} onPress={this.onCurrentLocationPressed}>
-          <Image source={require('../img/current_location_icon.png')} />
-        </TouchableOpacity> */}
+        { <TouchableOpacity style={styles.currentLocationIcon} onPress={this.onCurrentLocationPressed}>
+          <Image style={{width: 60, height: 60}} source={require('../img/current_location_icon.png')} />
+        </TouchableOpacity> }
 
         {/* display of the selected pin */}
         { this.state.selectedDisplay &&
@@ -152,55 +338,69 @@ export default class Map extends Component<{}> {
     );
   }
 
-  renderAnnotations () {
-    return this.state.displays.map((item, i) => (
-      <Mapbox.PointAnnotation
-        key={i}
-        id={'pointAnnotation'}
-        onSelected={(feature) => this.onAnnotationSelected(i, feature)}
-        onDeselected={() => this.onAnnotationDeselected(i)}
-        coordinate={[item.longitude, item.latitude]}>
-        <View style={styles.annotationContainer}>
-          <View style={styles.annotationFill} />
-        </View>
-        <Mapbox.Callout title={item.title}>
-          <View>
-          <Text>TestingTesting</Text>
-        </View>
-        </Mapbox.Callout>
-      </Mapbox.PointAnnotation>
-    ));
-  }
+  // renderAnnotations () {
+  //   return this.state.displays.map((item, i) => (
+  //     <Mapbox.PointAnnotation
+  //       key={i}
+  //       id={'pointAnnotation'}
+  //       onSelected={(feature) => this.onAnnotationSelected(i, feature)}
+  //       onDeselected={() => this.onAnnotationDeselected(i)}
+  //       coordinate={[item.longitude, item.latitude]}>
+  //       <View style={styles.annotationContainer}>
+  //         <View style={styles.annotationFill} />
+  //       </View>
+  //       <Mapbox.Callout title={item.title}>
+  //         <View>
+  //         <Text>TestingTesting</Text>
+  //       </View>
+  //       </Mapbox.Callout>
+  //     </Mapbox.PointAnnotation>
+  //   ));
+  // }
 
-  onAnnotationSelected (activeIndex, feature) {
-    // if (this.state.activeIndex === activeIndex) {
-      // return;
-    // }
+  onShapePressed(e) {
+    feature = e.nativeEvent.payload;
 
-    this._scaleIn = new Animated.Value(0.6);
-    Animated.timing(this._scaleIn, { toValue: 1.0, duration: 200 }).start();
-    this.setState({
-      selectedDisplay: this.state.displays[activeIndex],
-      activeAnnotationIndex: activeIndex
+    let displayKey = feature.properties.displayKey;
+
+    if (!displayKey) return;
+    
+    fetchDisplay(displayKey, display => {
+        this.setState({
+          selectedDisplay: display
+        });
     });
-
-    if (this.state.previousActiveAnnotationIndex !== -1) {
-      this._map.moveTo(feature.geometry.coordinates, 500);
-    }
   }
 
-  onAnnotationDeselected (deselectedIndex) {
-    let nextState = {};
+  // onAnnotationSelected (activeIndex, feature) {
+  //   // if (this.state.activeIndex === activeIndex) {
+  //     // return;
+  //   // }
 
-    if (this.state.activeAnnotationIndex === deselectedIndex) {
-      nextState.activeAnnotationIndex = -1;
-    }
+  //   this._scaleIn = new Animated.Value(0.6);
+  //   Animated.timing(this._scaleIn, { toValue: 1.0, duration: 200 }).start();
+  //   this.setState({
+  //     selectedDisplay: this.state.displays[activeIndex],
+  //     activeAnnotationIndex: activeIndex
+  //   });
 
-    this._scaleOut = new Animated.Value(1);
-    Animated.timing(this._scaleOut, { toValue: 0.6, duration: 200 }).start();
-    nextState.previousActiveAnnotationIndex = deselectedIndex;
-    this.setState(nextState);
-  }
+  //   if (this.state.previousActiveAnnotationIndex !== -1) {
+  //     this._map.moveTo(feature.geometry.coordinates, 500);
+  //   }
+  // }
+
+  // onAnnotationDeselected (deselectedIndex) {
+  //   let nextState = {};
+
+  //   if (this.state.activeAnnotationIndex === deselectedIndex) {
+  //     nextState.activeAnnotationIndex = -1;
+  //   }
+
+  //   this._scaleOut = new Animated.Value(1);
+  //   Animated.timing(this._scaleOut, { toValue: 0.6, duration: 200 }).start();
+  //   nextState.previousActiveAnnotationIndex = deselectedIndex;
+  //   this.setState(nextState);
+  // }
 
   onMenuPressed() {
     Actions.drawerOpen();
@@ -216,11 +416,17 @@ export default class Map extends Component<{}> {
     Actions.createDisplay();
   }
 
-  // onCurrentLocationPressed() {
-  //   this._map.setCamera({
-  //     centerCoordinate: [-118.243683, 34.052235],
-  //   });
-  // }
+  // center map on user's location
+  onCurrentLocationPressed = () => {
+    navigator
+      .geolocation
+      .getCurrentPosition(position => {
+        this.map.setCamera({
+          centerCoordinate: [position.coords.longitude, position.coords.latitude],
+          zoom: Globals.MAP_DEFAULT_ZOOM_LEVEL
+        });
+      });
+  }
 
   onDisplayPressed = (key: string) => {
     Actions.displayDetail({displayKey : key});
@@ -251,6 +457,11 @@ const styles = StyleSheet.create({
   addDisplayIcon: {
     position: 'absolute',
     top: 10,
+    right: 10
+  },
+  currentLocationIcon : {
+    position: 'absolute',
+    top: 60,
     right: 10
   },
   annotationContainer: {

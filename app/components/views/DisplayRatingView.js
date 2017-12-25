@@ -23,6 +23,7 @@ type Display = {
   description: string,
   starCount: number,
   image: string,
+  distance: number,
 };
 
 type Props = {
@@ -42,7 +43,20 @@ export default class DisplayRatingView extends Component<Props, State> {
       <View style={{margin: this.props.margin}}>
         <Text numberOfLines={1} style={{fontSize: 17, fontFamily: 'Monaco'}}>{this.props.item.title}</Text>
 
-        { this.props.item.starCount > 0 && this.renderDisplayRating(this.props.item) }
+        <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 5}}>
+{
+  this.props.item.starCount > 0 && this.renderDisplayRating(this.props.item)
+}
+
+{
+  this.props.item.starCount > 0 && this.props.item.distance && <Text> * </Text>
+}
+
+{
+  this.props.item.distance && this.renderDistance(this.props.item.distance)
+}
+          
+        </View>
       </View>
     );
   }
@@ -50,6 +64,12 @@ export default class DisplayRatingView extends Component<Props, State> {
   renderDisplayRating = (item: Display) => {
     return (
       <RatingView rating={item.starCount} />
+    );
+  }
+
+  renderDistance = (distance: number) => {
+    return (
+      <Text style={styles.distanceText}>{distance} MI NEARBY</Text>
     );
   }
 }
@@ -75,5 +95,11 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.4,
     shadowRadius: 3
+  },
+  distanceText: {
+    fontSize: 11,
+    color: '#B2B1C1',
+    fontFamily: 'Monaco',
+    backgroundColor: 'transparent'
   }
 });

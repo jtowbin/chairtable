@@ -8,15 +8,17 @@ import firebase from 'react-native-firebase';
 import {Actions} from 'react-native-router-flux';
 import Globals from './Globals';
 import {getCurrentUser, calculateAverageRating} from './Helpers';
+import GeoFire from 'geofire';
 
 // the firebase connection to the data set
 const firebaseRef = firebase.database().ref();
 
-// const userDisplaysRef = firebase.database().ref('/user_displays');
+// the GeoFire table that stores displays locations (used for radius search)
+// const geofireDisplaysRef = firebase.database().ref(Globals.FIREBASE_TBL_DISPLAYS_LOCATIONS);
+// const geofireRef = new GeoFire(geofireDisplaysRef);
 
 // retrieving displays from the firebase data set
 export function fetchDisplays(page: number, perPage: number, callback) {
-  // userDisplaysRef.remove();
     firebaseRef.child(Globals.FIREBASE_TBL_DISPLAYS)
       .limitToFirst((page + 1) * perPage)
       .on('value', (snap) => {
@@ -44,11 +46,14 @@ export function fetchDisplays(page: number, perPage: number, callback) {
             });
           }
 
+          // geofireRef.set(child.key, [child.val().Latitude, child.val().Longitude]);
+          //
           // var values = child.val();
           // values['Title'] = child.key;
-          //
-          // var key = userDisplaysRef.push().key;
-          // firebase.database().ref('/user_displays/' + key).set(values);
+
+          // firebase.database().ref('user_displays_locations').remove();
+          // var key = firebase.database().ref('user_displays').push().key;
+          // firebase.database().ref('user_displays').child(key).set(values);
         });
 
         callback(items);
@@ -68,6 +73,7 @@ export function fetchDisplay(displayKey: string, callback) {
       }
 
       var item = {
+        key: displayKey,
         title: snap.val().Title,
         description: snap.val().Description,
         starCount: avgRating,
@@ -91,17 +97,14 @@ export function loadFavoriteDisplays(userKey: string, callback) {
 
   // get list of favorited display ids for logged in user
   favoriteDisplaysRef.on('value', snapshot => {
-    console.log(snapshot);
     if (snapshot.val() != null) {
       var displayIds = Object.keys(snapshot.val());
 
       // get details of all displays
       Promise.all(
         displayIds.map(id => {
-          console.log('send request '+id);
           return firebase.database().ref(Globals.FIREBASE_TBL_DISPLAYS).child(id).once('value')
                     .then(snapshot => {
-                      console.log('got response '+id);
                       return snapshot;
                     })
         })
@@ -125,11 +128,16 @@ export function loadFavoriteDisplays(userKey: string, callback) {
         callback(items);
       })
       .catch((error) => console.log(error));
+    } else {
+      // no favorite displays found, we return an empty list
+      callback([]);
     }
   });
 }
 
 export function toggleFavorite(userKey: string, displayKey: string, callback) {
+  console.log('userKey: ' + userKey);
+  console.log('displayKey: ' + displayKey);
   const userFavoritesRef = firebase.database().ref(
     Globals.FIREBASE_TBL_USERS + '/' +
     userKey + '/' +
@@ -143,12 +151,14 @@ export function toggleFavorite(userKey: string, displayKey: string, callback) {
   displayFavoritesRef.once('value').then((snap) => {
     // value is null, so display wasn't yet favorited by this user
     if (!snap.val()) {
+      console.log('add');
       // mark display as favorite
       userFavoritesRef.set(true);
       displayFavoritesRef.set(true);
 
       callback(true);
     } else {
+      console.log('remove');
       // remove display from user's favorite list
       userFavoritesRef.remove();
       displayFavoritesRef.remove();

@@ -10,15 +10,19 @@
 		"flow": "flow"
 	},
 	"dependencies": {
-		"@mapbox/react-native-mapbox-gl": "^6.0.1",
-		"moment": "^2.20.0",
+		"@mapbox/geo-viewport": "^0.2.2",
+		"@mapbox/react-native-mapbox-gl": "^6.0.2",
+		"debounce": "^1.1.0",
+		"firebase": "^4.8.1",
+		"geofire": "^4.1.2",
+		"moment": "^2.20.1",
 		"react": "16.0.0",
 		"react-moment": "^0.6.8",
 		"react-native": "^0.51.0",
 		"react-native-cookies": "^3.2.0",
 		"react-native-easy-grid": "^0.1.15",
 		"react-native-fbsdk": "^0.6.3",
-		"react-native-firebase": "^3.1.1",
+		"react-native-firebase": "^3.2.0",
 		"react-native-image-picker": "^0.26.7",
 		"react-native-popup-dialog": "^0.10.44",
 		"react-native-read-more-text": "^1.0.0",
@@ -27,6 +31,7 @@
 		"react-native-super-grid": "^2.0.1",
 		"react-native-swiper": "^1.5.13",
 		"react-native-timeago": "^0.4.0",
+		"turf": "^3.0.14",
 		"uuid-js": "^0.7.5"
 	},
 	"devDependencies": {

@@ -25,6 +25,7 @@ type Display = {
   description: string,
   starCount: number,
   image: string,
+  isFavorited: boolean,
 };
 
 type Props = {
@@ -32,16 +33,22 @@ type Props = {
   ratingComponentMargin?: number,
 };
 
-type State = {};
+type State = {
+  isFavorited: boolean,
+};
 
 export default class DisplayView extends Component<Props, State> {
   static defaultProps = {
     item: null,
-    ratingComponentMargin: 20
+    ratingComponentMargin: 20,
   };
 
   constructor(props: Props) {
     super(props);
+
+    this.state = {
+      isFavorited: props.item.isFavorited,
+    };
   }
 
   render() {
@@ -54,7 +61,7 @@ export default class DisplayView extends Component<Props, State> {
             cache: 'force-cache',
           }} />
         <TouchableOpacity style={{zIndex: 1, position: 'absolute', top: 0, right: 0}} onPress={() => this.toggleFavoritePressed(this.props.item.key)}>
-          <Image source={this.props.item.isFavorited ? require('../../img/icon_favorite_filled.png') : require('../../img/icon_favorite_unfilled.png')} />
+          <Image source={this.state.isFavorited ? require('../../img/icon_favorite_filled.png') : require('../../img/icon_favorite_unfilled.png')} />
         </TouchableOpacity>
 
         <DisplayRatingView
@@ -67,7 +74,11 @@ export default class DisplayView extends Component<Props, State> {
   toggleFavoritePressed(displayKey: string) {
     let userId = getCurrentUser().uid;
 
-    toggleFavorite(userId, displayKey, isFavorited => {});
+    toggleFavorite(userId, displayKey, isFavorited => {
+      this.setState({
+        isFavorited: isFavorited,
+      });
+    });
   }
 
   onMenuPressed() {

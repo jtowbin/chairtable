@@ -15,12 +15,12 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
-  FlatList
+  FlatList,
 } from 'react-native';
 
 import firebase from 'react-native-firebase';
 import StarRating from 'react-native-star-rating';
-import {Actions} from 'react-native-router-flux';
+import {Actions, ActionConst} from 'react-native-router-flux';
 import ReadMore from 'react-native-read-more-text';
 import PopupDialog, {DialogButton} from 'react-native-popup-dialog';
 import TimeAgo from 'react-native-timeago';
@@ -276,7 +276,7 @@ export default class DisplayDetail extends Component<Props, State> {
   }
 
   onBackPressed() {
-    Actions.pop();
+    Actions.pop({type: ActionConst.REFRESH});
   }
 
   onStarRatingPress(rating: number) {

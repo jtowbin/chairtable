@@ -55,6 +55,10 @@ export function calculateAverageRating(ratings: [number]): number {
   return avgRating;
 }
 
+export function convertMapboxCoordinates(coordinate) {
+  return [coordinate[1], coordinate[0]];
+}
+
 export function fbAuth() {
   LoginManager.logInWithReadPermissions(['public_profile', 'email']).then(function(result) {
        if (result.isCancelled) {

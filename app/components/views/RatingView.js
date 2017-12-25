@@ -42,7 +42,7 @@ export default class RatingView extends Component<Props, State> {
     let formattedRating = formatToOneDecimal(rating);
 
     return (
-      <View style={{marginTop: 5, flexDirection: 'row', alignItems: 'center'}}>
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <StarRating
           disabled={true}
           starStyle={{marginRight: 5}}
