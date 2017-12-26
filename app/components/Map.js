@@ -257,12 +257,12 @@ export default class Map extends Component<{}> {
           <Image source={require('../img/menu_icon.png')} />
         </TouchableOpacity>
 
-        { <TouchableOpacity style={styles.addDisplayIcon} onPress={this.onCreateDisplayPressed}>
+        { /* <TouchableOpacity style={styles.addDisplayIcon} onPress={this.onCreateDisplayPressed}>
           <Image style={{width: 60, height: 60}} source={require('../img/icon_add_display.png')} />
-        </TouchableOpacity> }
+                </TouchableOpacity> */ }
 
         { <TouchableOpacity style={styles.currentLocationIcon} onPress={this.onCurrentLocationPressed}>
-          <Image style={{width: 60, height: 60}} source={require('../img/current_location_icon.png')} />
+          <Image style={{width: 70, height: 70}} source={require('../img/current_location_icon.png')} />
         </TouchableOpacity> }
 
         {/* display of the selected pin */}
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
   },
   currentLocationIcon : {
     position: 'absolute',
-    top: 60,
+    top: 10,
     right: 10
   },
   annotationContainer: {
