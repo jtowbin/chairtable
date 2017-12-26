@@ -167,19 +167,24 @@ export default class Map extends Component<{}> {
 
   attachGeoQueryCallbacks() {
     var onKeyEnteredRegistration = this.geoQuery.on("key_entered", (key, location, distance) => {
-        this.nearbyItems.push({
-          displayKey: key,
-          distance : distance,
-          location : location,
-        });
-      });
-
-    var onKeyExitedRegistration = this.geoQuery.on("key_exited", (key, location, distance) => {
         let index = this.nearbyItems.findIndex(value => value['displayKey'] == key);
-        if (index > -1) {
-          this.nearbyItems.splice(index, 1);
+
+        // only add new key if it wasn't already added
+        if (index == -1) {
+          this.nearbyItems.push({
+            displayKey: key,
+            distance : distance,
+            location : location,
+          });
         }
       });
+
+    // var onKeyExitedRegistration = this.geoQuery.on("key_exited", (key, location, distance) => {
+    //     let index = this.nearbyItems.findIndex(value => value['displayKey'] == key);
+    //     if (index > -1) {
+    //       // this.nearbyItems.splice(index, 1);
+    //     }
+    //   });
 
     var onReadyRegistration = this.geoQuery.on("ready", () => {
         var features = [];
@@ -261,8 +266,14 @@ export default class Map extends Component<{}> {
           <Image style={{width: 60, height: 60}} source={require('../img/icon_add_display.png')} />
                 </TouchableOpacity> */ }
 
-        { <TouchableOpacity style={styles.currentLocationIcon} onPress={this.onCurrentLocationPressed}>
-          <Image style={{width: 70, height: 70}} source={require('../img/current_location_icon.png')} />
+        { <TouchableOpacity
+            style={{
+              position: 'absolute',
+              bottom: this.state.selectedDisplay ? 173 : 0,
+              right: 0
+            }}
+            onPress={this.onCurrentLocationPressed}>
+          <Image style={{width: 80, height: 80}} source={require('../img/current_location_icon.png')} />
         </TouchableOpacity> }
 
         {/* display of the selected pin */}
@@ -455,11 +466,6 @@ const styles = StyleSheet.create({
     left: 22
   },
   addDisplayIcon: {
-    position: 'absolute',
-    top: 10,
-    right: 10
-  },
-  currentLocationIcon : {
     position: 'absolute',
     top: 10,
     right: 10
