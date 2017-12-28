@@ -14,8 +14,8 @@ import GeoFire from 'geofire';
 const firebaseRef = firebase.database().ref();
 
 // the GeoFire table that stores displays locations (used for radius search)
-// const geofireDisplaysRef = firebase.database().ref(Globals.FIREBASE_TBL_DISPLAYS_LOCATIONS);
-// const geofireRef = new GeoFire(geofireDisplaysRef);
+const geofireDisplaysRef = firebase.database().ref(Globals.FIREBASE_TBL_DISPLAYS_LOCATIONS);
+const geofireRef = new GeoFire(geofireDisplaysRef);
 
 // retrieving displays from the firebase data set
 export function fetchDisplays(page: number, perPage: number, callback) {
@@ -196,10 +196,8 @@ export function fetchRatingsForDisplay(displayKey: string, callback) {
             // console.log('send request '+id);
             let snapshot = firebase.database().ref(Globals.FIREBASE_TBL_USERS).child(review.userKey).once('value')
                       .then(snapshot => {
-                        // let displayName = snapshot.val().first_name + ' ' + snapshot.val().last_name;
                         return snapshot;
                       })
-// console.log(snapshot);
             return snapshot;
           })
         ).then(r => console.log(r) /*callback(r)*/)
@@ -228,14 +226,6 @@ export function updateRating(displayKey: string, userKey: number, rating: number
   var reviewKey = reviewsRef.push().key;
   reviewsRef.child(reviewKey).set(review);
 
-  // adding the rating to current user
-  // let userReviewsRef = firebaseRef.ref()
-  //   .child(Globals.FIREBASE_TBL_USERS)
-  //   .child(userKey)
-  //   .child(Globals.FIREBASE_TBL_REVIEWS)
-  //   .child(reviewKey);
-  // userReviewsRef.set(true);
-
   // adding the rating to current display
   let displayReviewsRef = firebaseRef
     .child(Globals.FIREBASE_TBL_DISPLAYS)
@@ -248,6 +238,7 @@ export function updateRating(displayKey: string, userKey: number, rating: number
   callback();
 }
 
+// check if user already exists
 export function userExists(userKey: string, callback) {
   firebaseRef
     .child(Globals.FIREBASE_TBL_USERS)
@@ -256,4 +247,18 @@ export function userExists(userKey: string, callback) {
       let userExists = (snap.val() != null);
       callback(userExists);
     });
+}
+
+// create a new display
+export function createDisplay(item, callback) {
+  var displayKey = firebaseRef.child(Globals.FIREBASE_TBL_DISPLAYS).push().key;
+  firebaseRef.child(Globals.FIREBASE_TBL_DISPLAYS).child(displayKey).set(item);
+
+  geofireRef.set(displayKey, [item.Latitude, item.Longitude]).then(function() {
+    console.log("Provided key has been added to GeoFire");
+  }, function(error) {
+    console.log("Error: " + error);
+  });
+
+  callback();
 }

@@ -13,27 +13,31 @@ import {
   View,
   TouchableOpacity,
   ImageBackground,
-  TextInput
+  TextInput,
+  Alert,
+  KeyboardAvoidingView
 } from 'react-native';
 
 import firebase from 'react-native-firebase';
 import {Actions} from 'react-native-router-flux';
+import {createDisplay} from '../FirebaseHelpers';
+import Globals from '../Globals';
 
 var ImagePicker = require('react-native-image-picker');
 var uuid = require('uuid-js');
 
 // More info on all the options is below in the README...just some common use cases shown here
 var options = {
-  title: 'Select Avatar',
-  customButtons: [
-    {name: 'fb', title: 'Choose Photo from Facebook'},
-  ],
+  title: null,
   storageOptions: {
     skipBackup: true,
     path: 'images'
-  }
+  },
+  maxWidth: 600,
+  maxHeight: 600
 };
 
+const CATEGORY_NONE = 'None';
 const CATEGORY_ANIMATION = 'Animation';
 const CATEGORY_RESIDENTIAL = 'Residential';
 const CATEGORY_MUSIC = 'Music';
@@ -46,26 +50,67 @@ export default class CreateDisplay extends Component<{}> {
     this.state = {
       displayTitle: '',
       displayDescription: '',
-      displayCategory: 'Animation',
-      avatarSource: null// { uri: 'https://cloud.netlifyusercontent.com/assets/344dbf88-fdf9-42bb-adb4-46f01eedd629/68dd54ca-60cf-4ef7-898b-26d7cbe48ec7/10-dithering-opt.jpg' }
+      displayCategory: CATEGORY_NONE,
+      displayAddress: '',
+      avatarSource: [],
     };
   }
 
-  render() {
-    var imageCapture = <View style={styles.emptyCameraContainer}>
-      <Image source={require('../img/icon_camera.png')} /><Text style={styles.cameraText}>ADD COVER PHOTO</Text>
-    </View>;
-
-    if (this.state.avatarSource != null) {
-      imageCapture = <Image style={styles.cameraIcon} source={this.state.avatarSource} />
+  renderPhotoItem(index) {
+    if (this.state.avatarSource.length > index) {
+      console.log(this.state.avatarSource);
+      return (
+        /*<TouchableOpacity onPress={() => this.onAddCoverPhoto(index)}>*/
+          <Image style={styles.cameraIcon} source={this.state.avatarSource[index]} />
+        /*</TouchableOpacity>*/
+      );
+    } else {
+      return (
+        <TouchableOpacity onPress={() => this.onAddCoverPhoto(index)}>
+          <View style={styles.emptyCameraItem}>
+            <Image source={require('../img/icon_camera.png')}/>
+            <Text style={styles.cameraText}>ADD COVER PHOTO</Text>
+          </View>
+        </TouchableOpacity>
+      );
     }
+  }
+
+  render() {
+    var imageCapture = (
+      <TouchableOpacity onPress={() => this.onAddCoverPhoto(0)}>
+        <View style={styles.emptyCameraContainer}>
+          <Image source={require('../img/icon_camera.png')} /><Text style={styles.cameraText}>ADD COVER PHOTO</Text>
+        </View>
+      </TouchableOpacity>
+    );
+
+    imageCapture = (
+      <View style={[styles.emptyCameraContainer, {flexDirection: 'row'}]}>
+        <View style={{width: '50%', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+            { this.renderPhotoItem(0) }
+            <View style={{height: 1}} />
+            { this.renderPhotoItem(2) }
+        </View>
+        <View style={{width: 1}} />
+        <View style={{width: '50%', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+            { this.renderPhotoItem(1) }
+            <View style={{height: 1}} />
+            { this.renderPhotoItem(3) }
+        </View>
+      </View>
+    );
 
     return (
       // <View style={styles.container}>
+      // <KeyboardAvoidingView style={styles.container} behavior="padding">
+      // <View>
       <ImageBackground
         resizeMode={'cover'}
         source={require('../img/map_add_display.png')}
-        style={styles.container}>
+        // style={{width: '100%', height: '100%'}}
+        style={styles.container}
+        >
         <View style={styles.navigation}>
           <TouchableOpacity style={styles.cancelButton} onPress={this.onCancelPressed}>
             <Text style={styles.cancelText}>Cancel</Text>
@@ -99,9 +144,16 @@ export default class CreateDisplay extends Component<{}> {
               placeholder='What you can find here?'
             />
 
+            <TextInput
+              style={styles.displayDescriptionText}
+              onChangeText={(text) => this.setState({displayAddress: text})}
+              value={this.state.displayAddress}
+              placeholder='Which is the address?'
+            />
+
             <View style={styles.categoriesContainer}>
               <View style={styles.categoryContainer}>
-                <TouchableOpacity style={styles.categoryImageContainer} onPress={() => this.setState({'displayCategory' : CATEGORY_ANIMATION})}>
+                <TouchableOpacity style={styles.categoryImageContainer} onPress={ () => this.onCategoryButtonPressed(CATEGORY_ANIMATION) }>
                   <Image source={this.state.displayCategory == CATEGORY_ANIMATION ? require('../img/category_active.png') : require('../img/category_inactive.png')} />
                   <Image style={styles.categoryInnerImage} source={this.state.displayCategory == CATEGORY_ANIMATION ? require('../img/category_icon_animation_inactive.png') : require('../img/category_icon_animation_active.png')} />
                 </TouchableOpacity>
@@ -109,7 +161,7 @@ export default class CreateDisplay extends Component<{}> {
               </View>
 
               <View style={styles.categoryContainer}>
-                <TouchableOpacity style={styles.categoryImageContainer} onPress={() => this.setState({'displayCategory' : CATEGORY_MUSIC})}>
+                <TouchableOpacity style={styles.categoryImageContainer} onPress={ () => this.onCategoryButtonPressed(CATEGORY_MUSIC) }>
                   <Image source={this.state.displayCategory == CATEGORY_MUSIC ? require('../img/category_active.png') : require('../img/category_inactive.png')} />
                   <Image style={styles.categoryInnerImage} source={this.state.displayCategory == CATEGORY_MUSIC ? require('../img/category_icon_music_inactive.png') : require('../img/category_icon_music_active.png')} />
                 </TouchableOpacity>
@@ -117,7 +169,7 @@ export default class CreateDisplay extends Component<{}> {
               </View>
 
               <View style={styles.categoryContainer}>
-                <TouchableOpacity style={styles.categoryImageContainer} onPress={() => this.setState({'displayCategory' : CATEGORY_RESIDENTIAL})}>
+                <TouchableOpacity style={styles.categoryImageContainer} onPress={ () => this.onCategoryButtonPressed(CATEGORY_RESIDENTIAL) }>
                   <Image source={this.state.displayCategory == CATEGORY_RESIDENTIAL ? require('../img/category_active.png') : require('../img/category_inactive.png')} />
                   <Image style={styles.categoryInnerImage} source={this.state.displayCategory == CATEGORY_RESIDENTIAL ? require('../img/category_icon_neighborhood_inactive.png') : require('../img/category_icon_neighborhood_active.png')} />
                 </TouchableOpacity>
@@ -125,7 +177,7 @@ export default class CreateDisplay extends Component<{}> {
               </View>
 
               <View style={styles.categoryContainer}>
-                <TouchableOpacity style={styles.categoryImageContainer} onPress={() => this.setState({'displayCategory' : CATEGORY_CHARITABLE})}>
+                <TouchableOpacity style={styles.categoryImageContainer} onPress={ () => this.onCategoryButtonPressed(CATEGORY_CHARITABLE) }>
                   <Image source={this.state.displayCategory == CATEGORY_CHARITABLE ? require('../img/category_active.png') : require('../img/category_inactive.png')} />
                   <Image style={styles.categoryInnerImage} source={this.state.displayCategory == CATEGORY_CHARITABLE ? require('../img/category_icon_charitable_inactive.png') : require('../img/category_icon_charitable_active.png')} />
                 </TouchableOpacity>
@@ -133,9 +185,9 @@ export default class CreateDisplay extends Component<{}> {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.cameraContainer} onPress={this.onAddCoverPhoto.bind(this)}>
+            <View style={styles.cameraContainer}>
               {imageCapture}
-            </TouchableOpacity>
+            </View>
 
             <TouchableOpacity style={styles.submitButton} onPress={this.onSavePressed.bind(this)}>
               <Image source={require('../img/round_button.png')} />
@@ -147,37 +199,118 @@ export default class CreateDisplay extends Component<{}> {
         </ImageBackground>
 
       </ImageBackground>
+      // </View>
+      // </KeyboardAvoidingView>
     );
+  }
+
+  validateSubmit() {
+    if (!this.state.displayTitle) {
+      Alert.alert(Globals.TEXT_DISPLAY_ADD_TITLE_REQUIRED);
+      return false;
+    } else if (this.state.avatarSource.length == 0) {
+      Alert.alert(Globals.TEXT_DISPLAY_ADD_IMAGES_REQUIRED);
+      return false;
+    }
+
+    return true;
+  }
+
+  onCategoryButtonPressed = (categoryType: string) => {
+    if (this.state.displayCategory == categoryType) {
+      this.setState({'displayCategory': CATEGORY_NONE})
+    } else {
+      this.setState({'displayCategory': categoryType})
+    }
   }
 
   onCancelPressed() {
     Actions.pop();
   }
 
-  onSavePressed() {
-    // upload image to firebase storage
-    var storageRef = firebase.storage().ref();
-    var imagesRef = storageRef.child('user_created/' + uuid.create() + '.jpg');
-    imagesRef.put(this.state.avatarSource.uri).then(function(snapshot) {
-      console.log('Uploaded a data_url string!');
-      console.log(snapshot.downloadURL);
+  onSavePressed = () => {
 
-      firebase.database().ref('user_displays').set({
-        // title: this.state.displayTitle,
-        // description: this.state.displayDescription,
-        // category: this.state.displayCategory,
-        profile_picture: snapshot.downloadURL
+    // validate input
+    if (!this.validateSubmit()) return false;
+
+    // get user's current location
+    navigator.geolocation.getCurrentPosition(position => {
+
+      // upload images to firebase storage
+      firebase.storage().ref('user_created').constructor.prototype.putFiles = function(files) { 
+        var ref = this;
+        return Promise.all(files.map(function(source) {
+          return ref.child(uuid.create() + '.jpg').put(source.uri);
+        }));
+      }
+
+      firebase.storage().ref('user_created').putFiles(this.state.avatarSource).then(metadatas => {
+        // Get an array of file metadata
+        console.log(metadatas);
+
+        var images = metadatas.map(metadata => {
+          return metadata.downloadURL;
+        })
+
+        var item = {};
+        item['Address'] = this.state.displayAddress;
+        item['Category'] = this.state.displayCategory;
+        item['CellImage'] = images[0];
+        item['Description'] = this.state.displayDescription;
+        item['DisplayName'] = this.state.displayTitle;
+        item['Facebook'] = '';
+        item['Images'] = images;
+        item['Last Date On'] = '';
+        item['Last Verified'] = '';
+        item['Latitude'] = position.coords.latitude;
+        item['Longitude'] = position.coords.longitude;
+        item['ParkingViewing info'] = '';
+        item['Title'] = this.state.displayTitle;
+        item['Video Aerial Drone'] = '';
+        item['Video links'] = '';
+        item['Walking Neighborhood'] = '';
+        item['Website'] = '';
+
+        createDisplay(item, () => {});
+      }).catch(function(error) {
+        // If any task fails, handle this
+        console.log(error);
       });
-    }).catch(function(error) {
-      console.log('Could not upload image');
+
+
+      // upload image to firebase storage
+      // var storageRef = firebase.storage().ref();
+      // var imagesRef = storageRef.child('user_created/' + uuid.create() + '.jpg');
+      // imagesRef.put(this.state.avatarSource[0].uri).then(snapshot => {
+      //   var item = {};
+      //   item['Address'] = this.state.displayAddress;
+      //   item['Category'] = this.state.displayCategory;
+      //   item['CellImage'] = snapshot.downloadURL;
+      //   item['Description'] = this.state.displayDescription;
+      //   item['DisplayName'] = this.state.displayTitle;
+      //   item['Facebook'] = '';
+      //   item['Images'] = [snapshot.downloadURL];
+      //   item['Last Date On'] = '';
+      //   item['Last Verified'] = '';
+      //   item['Latitude'] = position.coords.latitude;
+      //   item['Longitude'] = position.coords.longitude;
+      //   item['ParkingViewing info'] = '';
+      //   item['Title'] = this.state.displayTitle;
+      //   item['Video Aerial Drone'] = '';
+      //   item['Video links'] = '';
+      //   item['Walking Neighborhood'] = '';
+      //   item['Website'] = '';
+
+      //   createDisplay(item, () => {});
+      // }).catch(function(error) {
+      //   console.log(error);
+      // });
     });
+
+    Actions.pop();
   }
 
-  onCategoryPressed() {
-    this.setState({displayCategory: 'Animation'});
-  }
-
-  onAddCoverPhoto() {
+  onAddCoverPhoto(index) {
     ImagePicker.showImagePicker(options, (response) => {
       console.log('Response = ', response);
 
@@ -193,11 +326,12 @@ export default class CreateDisplay extends Component<{}> {
       else {
         let source = { uri: response.uri };
 
-        // You can also display the image using data:
-        // let source = { uri: 'data:image/jpeg;base64,' + response.data };
+        // add new photo to the existing state
+        var avatarSource = this.state.avatarSource;
+        avatarSource.splice(index, 0, source);
 
         this.setState({
-          avatarSource: source
+          avatarSource: avatarSource
         });
       }
     });
@@ -297,8 +431,8 @@ const styles = StyleSheet.create({
   cameraContainer: {
     marginTop: 10,
     height: 160,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start'
   },
   emptyCameraContainer: {
     flex: 1,
@@ -307,9 +441,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
+  emptyCameraItem: {
+    width: '100%',
+    height: 80,
+    backgroundColor: '#F6F6F9',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   cameraIcon: {
     width: '100%',
-    height: '100%'
+    height: 80
   },
   cameraText: {
     marginTop: 10,

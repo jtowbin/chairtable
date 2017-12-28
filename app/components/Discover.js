@@ -87,9 +87,9 @@ export default class Discover extends Component<Props, State> {
         this.searchDisplaysBasedOnRadius(position);
       },
       (error) => {
-        fetchDisplays(this.state.pageOfDisplays, minimumDisplaysPerPage, items => {
-          this.setState({displays: items, refreshing: false});
-        });
+        // fetchDisplays(this.state.pageOfDisplays, minimumDisplaysPerPage, items => {
+        //   this.setState({displays: items, refreshing: false});
+        // });
 
 
         this.setState({error: error.message})

@@ -227,7 +227,6 @@ export default class Map extends Component<{}> {
             userTrackingMode={Mapbox.UserTrackingModes.Follow}
             onRegionDidChange={debounce(this.handleRegionDidChange.bind(this), 200)}
             >
-            {/*this.renderAnnotations()*/}
 
             { this.state.source &&
               <Mapbox.ShapeSource
@@ -262,9 +261,15 @@ export default class Map extends Component<{}> {
           <Image source={require('../img/menu_icon.png')} />
         </TouchableOpacity>
 
-        { /* <TouchableOpacity style={styles.addDisplayIcon} onPress={this.onCreateDisplayPressed}>
-          <Image style={{width: 60, height: 60}} source={require('../img/icon_add_display.png')} />
-                </TouchableOpacity> */ }
+        {  <TouchableOpacity
+            style={{
+              position: 'absolute',
+              bottom: this.state.selectedDisplay ? 173+70 : 70,
+              right: 0
+            }}
+            onPress={this.onCreateDisplayPressed}>
+          <Image style={{width: 80, height: 80}} source={require('../img/icon_add_display.png')} />
+                </TouchableOpacity> }
 
         { <TouchableOpacity
             style={{
@@ -349,26 +354,6 @@ export default class Map extends Component<{}> {
     );
   }
 
-  // renderAnnotations () {
-  //   return this.state.displays.map((item, i) => (
-  //     <Mapbox.PointAnnotation
-  //       key={i}
-  //       id={'pointAnnotation'}
-  //       onSelected={(feature) => this.onAnnotationSelected(i, feature)}
-  //       onDeselected={() => this.onAnnotationDeselected(i)}
-  //       coordinate={[item.longitude, item.latitude]}>
-  //       <View style={styles.annotationContainer}>
-  //         <View style={styles.annotationFill} />
-  //       </View>
-  //       <Mapbox.Callout title={item.title}>
-  //         <View>
-  //         <Text>TestingTesting</Text>
-  //       </View>
-  //       </Mapbox.Callout>
-  //     </Mapbox.PointAnnotation>
-  //   ));
-  // }
-
   onShapePressed(e) {
     feature = e.nativeEvent.payload;
 
@@ -382,36 +367,6 @@ export default class Map extends Component<{}> {
         });
     });
   }
-
-  // onAnnotationSelected (activeIndex, feature) {
-  //   // if (this.state.activeIndex === activeIndex) {
-  //     // return;
-  //   // }
-
-  //   this._scaleIn = new Animated.Value(0.6);
-  //   Animated.timing(this._scaleIn, { toValue: 1.0, duration: 200 }).start();
-  //   this.setState({
-  //     selectedDisplay: this.state.displays[activeIndex],
-  //     activeAnnotationIndex: activeIndex
-  //   });
-
-  //   if (this.state.previousActiveAnnotationIndex !== -1) {
-  //     this._map.moveTo(feature.geometry.coordinates, 500);
-  //   }
-  // }
-
-  // onAnnotationDeselected (deselectedIndex) {
-  //   let nextState = {};
-
-  //   if (this.state.activeAnnotationIndex === deselectedIndex) {
-  //     nextState.activeAnnotationIndex = -1;
-  //   }
-
-  //   this._scaleOut = new Animated.Value(1);
-  //   Animated.timing(this._scaleOut, { toValue: 0.6, duration: 200 }).start();
-  //   nextState.previousActiveAnnotationIndex = deselectedIndex;
-  //   this.setState(nextState);
-  // }
 
   onMenuPressed() {
     Actions.drawerOpen();
