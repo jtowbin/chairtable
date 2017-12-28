@@ -23,6 +23,7 @@
 		140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		28DD5EA1BDE2A3FA9050D076 /* libPods-chairtableTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F05CEF77588EB5DBA688AB8 /* libPods-chairtableTests.a */; };
+		3A2A59D41FF5A47600C9A05D /* libReactNativePermissions.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A2A59D01FF5A45800C9A05D /* libReactNativePermissions.a */; };
 		3A428CCE1FD57848006EB3F1 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A428CCD1FD57847006EB3F1 /* FBSDKLoginKit.framework */; };
 		3A428CD21FD578AF006EB3F1 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A428CCF1FD578AF006EB3F1 /* FBSDKCoreKit.framework */; };
 		3A428CD31FD578AF006EB3F1 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A428CD01FD578AF006EB3F1 /* Bolts.framework */; };
@@ -116,6 +117,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = 83CBBA2E1A601D0E00E9B192;
 			remoteInfo = React;
+		};
+		3A2A59CF1FF5A45800C9A05D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3A2A59A61FF5A45800C9A05D /* ReactNativePermissions.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9D23B34F1C767B80008B4819;
+			remoteInfo = ReactNativePermissions;
 		};
 		3A4A0C1F1FE2DC670051079F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -380,6 +388,7 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = chairtable/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		23743AEC09F5468C8AE7CE1B /* libRCTFBSDK.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTFBSDK.a; sourceTree = "<group>"; };
+		3A2A59A61FF5A45800C9A05D /* ReactNativePermissions.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactNativePermissions.xcodeproj; path = "../node_modules/react-native-permissions/ios/ReactNativePermissions.xcodeproj"; sourceTree = "<group>"; };
 		3A428CCD1FD57847006EB3F1 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKLoginKit.framework; path = ../../../../../../FacebookSDK/FBSDKLoginKit.framework; sourceTree = "<group>"; };
 		3A428CCF1FD578AF006EB3F1 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = ../../../../../../FacebookSDK/FBSDKCoreKit.framework; sourceTree = "<group>"; };
 		3A428CD01FD578AF006EB3F1 /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Bolts.framework; path = ../../../../../../FacebookSDK/Bolts.framework; sourceTree = "<group>"; };
@@ -429,6 +438,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3A2A59D41FF5A47600C9A05D /* libReactNativePermissions.a in Frameworks */,
 				3A4A0C211FE2DC770051079F /* libRNImagePicker.a in Frameworks */,
 				3A90E6B81FDACD7A00A9226C /* libRCTMGL.a in Frameworks */,
 				3A428CCE1FD57848006EB3F1 /* FBSDKLoginKit.framework in Frameworks */,
@@ -587,6 +597,14 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		3A2A59A71FF5A45800C9A05D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3A2A59D01FF5A45800C9A05D /* libReactNativePermissions.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		3A4A0BF51FE2DC670051079F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -677,6 +695,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				3A2A59A61FF5A45800C9A05D /* ReactNativePermissions.xcodeproj */,
 				3A4A0BF41FE2DC670051079F /* RNImagePicker.xcodeproj */,
 				3A90E6B21FDACD6000A9226C /* RCTMGL.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
@@ -891,6 +910,10 @@
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
 				},
 				{
+					ProductGroup = 3A2A59A71FF5A45800C9A05D /* Products */;
+					ProjectRef = 3A2A59A61FF5A45800C9A05D /* ReactNativePermissions.xcodeproj */;
+				},
+				{
 					ProductGroup = 3A90E61C1FDABB3800A9226C /* Products */;
 					ProjectRef = CE9318AB842D49A2AE209A1E /* RNCookieManagerIOS.xcodeproj */;
 				},
@@ -966,6 +989,13 @@
 			fileType = archive.ar;
 			path = libReact.a;
 			remoteRef = 146834031AC3E56700842450 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3A2A59D01FF5A45800C9A05D /* libReactNativePermissions.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libReactNativePermissions.a;
+			remoteRef = 3A2A59CF1FF5A45800C9A05D /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		3A4A0C201FE2DC670051079F /* libRNImagePicker.a */ = {

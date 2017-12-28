@@ -220,11 +220,15 @@ export default class Map extends Component<{}> {
         { <Mapbox.MapView
             ref={(c) => {this.map = c}}
             styleURL={Mapbox.StyleURL.Dark}
+            centerCoordinate={[-95.712900, 37.090200]}
             zoomLevel={Globals.MAP_DEFAULT_ZOOM_LEVEL}
+            minZoomLevel={Globals.MAP_MIN_ZOOM_LEVEL}
+            maxZoomLevel={Globals.MAP_MAX_ZOOM_LEVEL}
             zoomEnabled={true}
             style={styles.mapbox}
             showUserLocation={true}
             userTrackingMode={Mapbox.UserTrackingModes.Follow}
+            onDidFinishLoadingMap={this.onCurrentLocationPressed}
             onRegionDidChange={debounce(this.handleRegionDidChange.bind(this), 200)}
             >
 

@@ -9,6 +9,8 @@ module.exports = {
   MAPBOX_ACCESS_TOKEN: 'pk.eyJ1IjoiZnJpZmViIiwiYSI6ImNqYXR6NWZrZDFybTQyd3BoeTkzdnZiOWUifQ.3VEaucL01Hj4Lf7nHAwJgw',
   REVIEW_MAX_CHAR_LENGTH: 200,
   MAP_DEFAULT_ZOOM_LEVEL: 12,
+  MAP_MIN_ZOOM_LEVEL : 8,
+  MAP_MAX_ZOOM_LEVEL : 18,
 
   TEXT_DISPLAY_ADD_TITLE_REQUIRED: 'Please fill in display\'s title.',
   TEXT_DISPLAY_ADD_IMAGES_REQUIRED : 'Please upload at least one image.',

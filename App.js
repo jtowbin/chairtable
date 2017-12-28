@@ -85,9 +85,11 @@ export default class App extends Component<{}> {
                 <Scene key="discover" component={Discover} title="Discover" hideNavBar={true} />
               </Stack>
 
-              <Stack key="tab2" title="map" icon={TabIcon}>
-                <Scene key="map" component={Map} title="Map" hideNavBar={true}/>
-              </Stack>
+              {
+                <Stack key="tab2" title="map" icon={TabIcon}>
+                  <Scene key="map" component={Map} title="Map" hideNavBar={true}/>
+                </Stack>
+              }
 
               <Stack key="tab3" title="profile" icon={TabIcon}>
                 <Scene key="profile" component={Profile} title="Profile" hideNavBar={true} />

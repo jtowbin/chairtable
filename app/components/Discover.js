@@ -16,13 +16,14 @@ import {
   TouchableWithoutFeedback,
   FlatList,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
 } from 'react-native';
 
 import firebase from 'react-native-firebase';
 import GeoFire from 'geofire';
 import StarRating from 'react-native-star-rating';
 import {Actions} from 'react-native-router-flux';
+import Permissions from 'react-native-permissions';
 import Globals from '../Globals';
 import {getCurrentUser, calculateAverageRating} from '../Helpers';
 import {fetchDisplays} from '../FirebaseHelpers';
@@ -81,60 +82,65 @@ export default class Discover extends Component<Props, State> {
     };
   }
 
-  componentWillMount() {
-    // get user's current location
-    navigator.geolocation.getCurrentPosition(position => {
-        console.log('INITIAL POSITION: ' + position.coords.latitude + ' ' + position.coords.longitude);
+  componentDidMount() {
+    // Permissions.check('location').then(response => {
+    //   console.log('Response: ' + response);
+    // });
+    Permissions.request('location', 'whenInUse')
+      .then(response => {
+        console.log('Response: ' + response);
+        if (response === 'whenInUse' || response == 'authorized') {
+          // get user's current location
+          navigator.geolocation.getCurrentPosition(
+            this.locationSuccess,
+            this.locationError, {
+              enableHighAccuracy: false,
+              timeout: 20 * 1000, // 20 seconds
+              maximumAge : 10 * 60 * 1000, // 10 minutes
+            },
+          );
+        } else if (response === 'denied') {
+          console.log('denied');
 
-// position.coords.latitude = 37.733795;
-// position.coords.longitude = -122.446747;
+          this.finishedSearchingForPosition = true;
 
-        this.position = position;
-
-        this.finishedSearchingForPosition = true;
-
-        this.searchRadius = initialSearchRadius;
-        this.searchDisplaysBasedOnRadius(position);
-      },
-      (error) => {
-        this.finishedSearchingForPosition = true;
-
-        fetchDisplays(this.state.pageOfDisplays, minimumDisplaysPerPage, items => {
-          this.setState({displays: items, refreshing: false});
-        });
-
-        this.setState({error: error.message})
-      }, {
-        // enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 60000,
-        useSignificantChanges: true,
-        distanceFilter: 10
-      },
-    );
-
-    // add location watch
-    // this.watchId = navigator.geolocation.watchPosition(position => {
-    //     console.log('NEW POSITION: ' + position.coords.latitude + ' ' + position.coords.longitude);
-
-    //     // this.searchDisplaysBasedOnRadius(position);
-    //   },
-    //   (error) => this.setState({ error: error.message }),
-    //   {
-    //     enableHighAccuracy: true,
-    //     timeout: 20000,
-    //     maximumAge: 1000,
-    //     useSignificantChanges: true,
-    //     distanceFilter: 10
-    //   },
-    // );
+          fetchDisplays(this.state.pageOfDisplays, minimumDisplaysPerPage, items => {
+            this.setState({displays: items, refreshing: false});
+          });
+        }
+      });
   }
 
   componentWillUnmount() {
-    this.detachGeoQueryCallbacks();
     if (this.geoQuery) this.geoQuery.cancel();
-    //  navigator.geolocation.clearWatch(this.watchId);
    }
+
+  // user's location was successfully retrieved
+  locationSuccess = position => {
+    console.log('INITIAL POSITION: ' + position.coords.latitude + ' ' + position.coords.longitude);
+
+    // position.coords.latitude = 37.733795; position.coords.longitude =
+    // -122.446747;
+
+    this.position = position;
+
+    this.finishedSearchingForPosition = true;
+
+    this.searchRadius = initialSearchRadius;
+    this.searchDisplaysBasedOnRadius(position);
+  }
+
+  // user's location wasn't retrieved
+  locationError = error => {
+    this.finishedSearchingForPosition = true;
+
+    fetchDisplays(this.state.pageOfDisplays, minimumDisplaysPerPage, items => {
+      this.setState({displays: items, refreshing: false});
+    });
+
+    console.log(error.message);
+    // this.setState({error: error.message})
+  }
 
   refreshDisplays() {
     if (this.finishedSearchingForPosition) {
@@ -182,12 +188,6 @@ export default class Discover extends Component<Props, State> {
 
       this.radiusIncrementAttempts++;
     }
-  }
-
-  detachGeoQueryCallbacks() {
-    this.geoQuery.off("key_entered");
-    this.geoQuery.off("key_exited");
-    this.geoQuery.off("ready");
   }
 
   attachGeoQueryCallbacks() {
@@ -345,13 +345,7 @@ export default class Discover extends Component<Props, State> {
             onEndReached={this.loadMoreMessages.bind(this)}
             onEndReachedThreshold={this.minimumDisplaysPerPage}
             keyExtractor={item => item.key}
-            renderItem={({item}) =>
-              <TouchableWithoutFeedback onPress={() => this.onDisplayPressed(item.key)}>
-                <View>
-                  <DisplayView item={item} style={styles.cardView} />
-                </View>
-              </TouchableWithoutFeedback>
-            }
+            renderItem={this.renderListItem}
             />
 
         </View>
@@ -359,6 +353,16 @@ export default class Discover extends Component<Props, State> {
         { /*this.state.refreshing && this.renderLoader()*/ }
         
       </ImageBackground>
+    );
+  }
+
+  renderListItem = ({item}) => {
+    return (
+      <TouchableWithoutFeedback onPress={() => this.onDisplayPressed(item.key)}>
+        <View>
+          <DisplayView item={item} style={styles.cardView} />
+        </View>
+      </TouchableWithoutFeedback>
     );
   }
 
