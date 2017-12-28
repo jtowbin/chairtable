@@ -54,6 +54,8 @@ const geofireRef = new GeoFire(geofireDisplaysRef);
 // number of displays to load in one request to firebase
 const minimumDisplaysPerPage = 5;
 const radiusIncrement = 3;
+const initialSearchRadius = 5;
+const maximumRadiusIncrementAttempts = 30;
 
 const {width, height} = Dimensions.get('window');
 const equalWidth = (width / 2)
@@ -64,11 +66,13 @@ export default class Discover extends Component<Props, State> {
     super();
 
     this.geoQuery = undefined;
-    this.searchRadius = 5;
+    this.searchRadius = initialSearchRadius;
     this.foundDisplayKeys = [];
     this.numberOfRenderedDisplays = 0;
     this.position = undefined;
+    this.finishedSearchingForPosition = false;
     this.pageOfDisplays = 1;
+    this.radiusIncrementAttempts = 0;
 
     this.state = {
       displays: [],
@@ -82,21 +86,28 @@ export default class Discover extends Component<Props, State> {
     navigator.geolocation.getCurrentPosition(position => {
         console.log('INITIAL POSITION: ' + position.coords.latitude + ' ' + position.coords.longitude);
 
+// position.coords.latitude = 37.733795;
+// position.coords.longitude = -122.446747;
+
         this.position = position;
 
+        this.finishedSearchingForPosition = true;
+
+        this.searchRadius = initialSearchRadius;
         this.searchDisplaysBasedOnRadius(position);
       },
       (error) => {
-        // fetchDisplays(this.state.pageOfDisplays, minimumDisplaysPerPage, items => {
-        //   this.setState({displays: items, refreshing: false});
-        // });
+        this.finishedSearchingForPosition = true;
 
+        fetchDisplays(this.state.pageOfDisplays, minimumDisplaysPerPage, items => {
+          this.setState({displays: items, refreshing: false});
+        });
 
         this.setState({error: error.message})
       }, {
         // enableHighAccuracy: true,
         timeout: 20000,
-        maximumAge: 1000,
+        maximumAge: 60000,
         useSignificantChanges: true,
         distanceFilter: 10
       },
@@ -120,12 +131,23 @@ export default class Discover extends Component<Props, State> {
   }
 
   componentWillUnmount() {
+    this.detachGeoQueryCallbacks();
     if (this.geoQuery) this.geoQuery.cancel();
     //  navigator.geolocation.clearWatch(this.watchId);
    }
 
   refreshDisplays() {
-    this.searchDisplaysBasedOnRadius(this.position);
+    if (this.finishedSearchingForPosition) {
+      if (this.position == undefined) {
+        fetchDisplays(this.state.pageOfDisplays, minimumDisplaysPerPage, items => {
+          this.setState({displays: items, refreshing: false});
+        });
+      } else {
+        this.searchRadius = initialSearchRadius;
+        this.pageOfDisplays = 1;
+        this.searchDisplaysBasedOnRadius(this.position);
+      }
+    }
   }
 
   searchDisplaysBasedOnRadius(position) {
@@ -143,7 +165,8 @@ export default class Discover extends Component<Props, State> {
     } else {
       // just update the existing geo query
       this.geoQuery.updateCriteria({
-        center: [position.coords.latitude, position.coords.longitude]
+        center: [position.coords.latitude, position.coords.longitude],
+        radius: this.searchRadius
       });
     }
   }
@@ -152,13 +175,23 @@ export default class Discover extends Component<Props, State> {
     if (this.geoQuery) {
       this.searchRadius = newRadius;
 
+      console.log("radius changed to: " + newRadius);
       this.geoQuery.updateCriteria({
         radius: newRadius,
       });
+
+      this.radiusIncrementAttempts++;
     }
   }
 
+  detachGeoQueryCallbacks() {
+    this.geoQuery.off("key_entered");
+    this.geoQuery.off("key_exited");
+    this.geoQuery.off("ready");
+  }
+
   attachGeoQueryCallbacks() {
+    console.log("Attach geo");
     var onKeyEnteredRegistration = this.geoQuery.on("key_entered", (key, location, distance) => {
       console.log(key + " entered the query at " + distance + " km distance!");
 
@@ -180,6 +213,11 @@ export default class Discover extends Component<Props, State> {
     var onReadyRegistration = this.geoQuery.on("ready", () => {
       console.log("*** 'ready' event fired - radius: " + this.searchRadius + " ***");
 
+      // if we found at least one display, reset the radius increment attempts counter
+      if (this.foundDisplayKeys.length > 0) {
+        this.radiusIncrementAttempts = 0;
+      }
+
       // sort found displays by distance
       this.foundDisplayKeys.sort((item1, item2) => {
         let distance1 = Object.values(item1)[0];
@@ -188,14 +226,12 @@ export default class Discover extends Component<Props, State> {
         return parseFloat(distance1) - parseFloat(distance2);
       });
 
-      if (this.foundDisplayKeys.length < minimumDisplaysPerPage * this.pageOfDisplays) {
+      console.log('displays count: ' + this.foundDisplayKeys.length + ' page: ' + this.pageOfDisplays);
+      if (this.foundDisplayKeys.length < minimumDisplaysPerPage * this.pageOfDisplays && this.radiusIncrementAttempts < maximumRadiusIncrementAttempts) {
         // we need more displays to show the next page, increase radius
-        this.searchRadius += radiusIncrement;
-        console.log('new radius: ' + this.searchRadius);
-      
-        this.geoQuery.updateCriteria({
-          radius: this.searchRadius,
-        });
+        // this.searchRadius += radiusIncrement;
+        // this.searchDisplaysByChangingRadius(this.searchRadius);
+        this.loadMoreMessages();
       } else {
         console.log('showing for radius: ' + this.searchRadius);
         this.numberOfRenderedDisplays = this.foundDisplayKeys.length;
@@ -205,18 +241,13 @@ export default class Discover extends Component<Props, State> {
         console.log('page of displays: ' + this.pageOfDisplays);
 
         // we have enough displays to show the next page, show displays
-        // this.loadDisplayItems(this.foundDisplayKeys, (items) => {
-        //   this.setState({displays: items, refreshing: false});
-        // });
+        this.loadDisplayItems(this.foundDisplayKeys, (items) => {
+          this.setState({displays: items, refreshing: false});
+        });
       
+        console.log(this.foundDisplayKeys);
         // geoQuery.cancel();
       }
-
-      this.loadDisplayItems(this.foundDisplayKeys, (items) => {
-        this.setState({displays: items, refreshing: false});
-      });
-
-      console.log(this.foundDisplayKeys);
     });
   }
 
@@ -267,7 +298,21 @@ export default class Discover extends Component<Props, State> {
   loadMoreMessages () {
     console.log('load more');
 
-    this.searchDisplaysByChangingRadius(this.searchRadius + radiusIncrement);
+    if (this.finishedSearchingForPosition) {
+      if (this.position == undefined) {
+        this.setState(
+        {
+          pageOfDisplays: this.state.pageOfDisplays+1
+        },
+        () => {
+          fetchDisplays(this.state.pageOfDisplays, minimumDisplaysPerPage, items => {
+            this.setState({displays: items, refreshing: false});
+          });
+        });
+      } else {
+        this.searchDisplaysByChangingRadius(this.searchRadius + radiusIncrement);
+      }
+    }
   }
 
   render() {
@@ -298,14 +343,15 @@ export default class Discover extends Component<Props, State> {
             onRefresh={() => this.refreshDisplays()}
             data={this.state.displays}
             onEndReached={this.loadMoreMessages.bind(this)}
-            // onEndReachedThreshold={50000}
+            onEndReachedThreshold={this.minimumDisplaysPerPage}
             keyExtractor={item => item.key}
             renderItem={({item}) =>
               <TouchableWithoutFeedback onPress={() => this.onDisplayPressed(item.key)}>
                 <View>
                   <DisplayView item={item} style={styles.cardView} />
                 </View>
-              </TouchableWithoutFeedback>}
+              </TouchableWithoutFeedback>
+            }
             />
 
         </View>

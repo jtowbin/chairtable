@@ -78,28 +78,30 @@ export default class CreateDisplay extends Component<{}> {
 
   render() {
     var imageCapture = (
-      <TouchableOpacity onPress={() => this.onAddCoverPhoto(0)}>
-        <View style={styles.emptyCameraContainer}>
+      <TouchableOpacity style={styles.emptyCameraContainer} onPress={() => this.onAddCoverPhoto(0)}>
+        <View style={{justifyContent: 'center', alignItems: 'center'}}>
           <Image source={require('../img/icon_camera.png')} /><Text style={styles.cameraText}>ADD COVER PHOTO</Text>
         </View>
       </TouchableOpacity>
     );
 
-    imageCapture = (
-      <View style={[styles.emptyCameraContainer, {flexDirection: 'row'}]}>
-        <View style={{width: '50%', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-            { this.renderPhotoItem(0) }
-            <View style={{height: 1}} />
-            { this.renderPhotoItem(2) }
+    if (this.state.avatarSource.length > 0) {
+      imageCapture = (
+        <View style={[styles.emptyCameraContainer, {flexDirection: 'row'}]}>
+          <View style={{width: '50%', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+              { this.renderPhotoItem(0) }
+              <View style={{height: 1}} />
+              { this.renderPhotoItem(2) }
+          </View>
+          <View style={{width: 1}} />
+          <View style={{width: '50%', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+              { this.renderPhotoItem(1) }
+              <View style={{height: 1}} />
+              { this.renderPhotoItem(3) }
+          </View>
         </View>
-        <View style={{width: 1}} />
-        <View style={{width: '50%', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-            { this.renderPhotoItem(1) }
-            <View style={{height: 1}} />
-            { this.renderPhotoItem(3) }
-        </View>
-      </View>
-    );
+      );
+    }
 
     return (
       // <View style={styles.container}>

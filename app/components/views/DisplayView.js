@@ -37,7 +37,7 @@ type State = {
   isFavorited: boolean,
 };
 
-export default class DisplayView extends Component<Props, State> {
+export default class DisplayView extends React.PureComponent<Props, State> {
   static defaultProps = {
     item: null,
     ratingComponentMargin: 20,
@@ -54,12 +54,12 @@ export default class DisplayView extends Component<Props, State> {
   render() {
     return (
       <View style={[styles.cardView, this.props.displayStyle]}>
-        <Image
+        {<Image
           style={{width: '100%', height: 200, resizeMode: 'cover'}}
           source={{
             uri: this.props.item.image,
             cache: 'force-cache',
-          }} />
+          }} />}
         <TouchableOpacity style={{zIndex: 1, position: 'absolute', top: 0, right: 0}} onPress={() => this.toggleFavoritePressed(this.props.item.key)}>
           <Image source={this.state.isFavorited ? require('../../img/icon_favorite_filled.png') : require('../../img/icon_favorite_unfilled.png')} />
         </TouchableOpacity>
