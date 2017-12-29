@@ -19,6 +19,8 @@ import {Actions, Scene, Router, Stack, Tabs, Drawer, Modal} from 'react-native-r
 
 import Home from './app/components/Home';
 import Login from './app/components/Login';
+import EmailLogin from './app/components/EmailLogin';
+import Register from './app/components/Register';
 import Tutorial from './app/components/Tutorial';
 import Discover from './app/components/Discover';
 import Profile from './app/components/Profile';
@@ -59,6 +61,8 @@ export default class App extends Component<{}> {
           <Scene key="home" component={Home} hideNavBar={false}/>
           <Scene key="tutorial" component={Tutorial} hideNavBar />
           <Scene key="login" component={Login} hideNavBar />
+          <Scene key="emailLogin" component={EmailLogin} hideNavBar />
+          <Scene key="register" component={Register} hideNavBar />
 
           <Scene key="createDisplay" component={CreateDisplay} hideNavBar modal />
           <Scene key="displayDetail" component={DisplayDetail} hideNavBar />

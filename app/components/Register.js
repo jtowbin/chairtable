@@ -22,7 +22,7 @@ import {Actions} from 'react-native-router-flux';
 import Globals from '../Globals.js';
 import {fbAuth} from '../Helpers.js';
 
-export default class Login extends Component<{}> {
+export default class Register extends Component<{}> {
   render() {
     return (
       <View style={styles.container}>

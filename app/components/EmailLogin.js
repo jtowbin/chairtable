@@ -22,7 +22,7 @@ import {Actions} from 'react-native-router-flux';
 import Globals from '../Globals.js';
 import {fbAuth} from '../Helpers.js';
 
-export default class Login extends Component<{}> {
+export default class EmailLogin extends Component<{}> {
   render() {
     return (
       <View style={styles.container}>
@@ -31,29 +31,18 @@ export default class Login extends Component<{}> {
            barStyle="light-content"
          />
 
-        <TouchableOpacity style={{position: 'absolute', top: 30, right: 30}} onPress={() => Actions.emailLogin()}>
-          <Text style={{fontFamily: 'Avenir-Medium', fontSize: 15, backgroundColor:'transparent', color: 'white'}}>Log In</Text>
+        <TouchableOpacity style={styles.backIcon} onPress={() => Actions.pop()}>
+          <Image style={{width: 40, height: 40}} source={require('../img/back_icon.png')} />
         </TouchableOpacity>
 
         <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'center'}}>
 
-          <Image style={styles.logo} source={require('../img/deer.png')} />
-          <Text style={styles.titleText}>
-            <Text>Welcome to</Text>
-            <Text style={{fontFamily: 'Avenir-Heavy'}}> Rudolf</Text>
-          </Text>
-          <Text style={styles.subtitleText}>
-            <Text>Rudolf is a Christmas</Text>
-            <Text style={{fontFamily: 'Avenir-Heavy'}}> enthusiast-only </Text>
-            <Text>community of decorators and families from all over the world.</Text>
-          </Text>
+          <Text style={styles.titleText}></Text>
 
-          <TouchableOpacity style={{marginTop: 30}} onPress={fbAuth}>
-              <ImageBackground resizeMode={'contain'} style={styles.facebookButton} source={require('../img/btn_fb_blue.png')}>
-                <Image style={{width: 20, height: 20, marginBottom: 5}} source={require('../img/facebook_icon.png')} />
-                <Text style={{marginLeft: 15, fontFamily: 'Avenir-Heavy', fontSize: 15, backgroundColor:'transparent', color: 'white'}}>Continue with Facebook</Text>
-              </ImageBackground>
-          </TouchableOpacity>
+            <ImageBackground resizeMode={'contain'} source={require('../img/input_field_background.png')}>
+              <Image style={{width: 20, height: 20, marginBottom: 5}} source={require('../img/icon_input_email.png')} />
+              <Text style={{marginLeft: 15, fontFamily: 'Avenir-Heavy', fontSize: 15, backgroundColor:'transparent', color: 'white'}}>Continue with Facebook</Text>
+            </ImageBackground>
 
           <TouchableOpacity style={{marginTop: 30}} onPress={() => Actions.register()}>
               <ImageBackground resizeMode={'contain'} style={styles.facebookButton} source={require('../img/btn_round_transparent.png')}>
@@ -72,6 +61,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#423747'
+  },
+  backIcon: {
+    position: 'absolute',
+    zIndex: 1,
+    top: 22,
+    left: 12
   },
   logo: {
     marginTop: 140,

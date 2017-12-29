@@ -108,7 +108,8 @@ export default class Discover extends Component<Props, State> {
             this.setState({displays: items, refreshing: false});
           });
         }
-      });
+      })
+      .catch(error => console.log(error));
   }
 
   componentWillUnmount() {
