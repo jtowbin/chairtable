@@ -18,48 +18,24 @@ import {
 import {Actions, Scene, Router} from 'react-native-router-flux'
 
 import Globals from '../Globals';
+import {getCurrentUser} from '../Helpers';
 
 export default class Discover extends Component<{}> {
-  constructor() {
-    super();
-    this.state = {
-      tutorialViewed: false,
-      loggedIn: false,
-    };
-  }
-
   componentWillMount() {
     // check if tutorial was viewed
     AsyncStorage.getItem(Globals.STORAGE_KEY_TUTORIAL_IS_VIEWED).then(value => {
       if (value == null) {
         // tutorial not viewed
-        this.setState({
-          tutorialViewed: false,
-          loggedIn: false,
-        });
-
         Actions.tutorial({type: 'reset'});
       } else {
         // check if user is logged in
-        AsyncStorage.getItem(Globals.STORAGE_KEY_LOGGED_IN).then(value => {
-          if (value == null || value == "0") {
-            // not logged in
-            this.setState({
-              tutorialViewed: true,
-              loggedIn: false,
-            });
-
-            Actions.login({type: 'reset'});
-          } else {
-            // logged in
-            this.setState({
-              tutorialViewed: true,
-              loggedIn: true,
-            });
-
-            Actions.main({type: 'reset'});
-          }
-        });
+        if (getCurrentUser()) {
+          // logged in
+          Actions.main({type: 'reset'});
+        } else {
+          // not logged in
+          Actions.login({type: 'reset'});
+        }
       }
     });
   }

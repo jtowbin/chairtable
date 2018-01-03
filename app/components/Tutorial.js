@@ -21,7 +21,7 @@ import {Actions} from 'react-native-router-flux';
 
 import Swiper from 'react-native-swiper';
 import Globals from '../Globals.js';
-import {fbAuth} from '../Helpers.js';
+import {loginUsingFacebook} from '../Helpers.js';
 
 const { width, height } = Dimensions.get('window');
 const SCREEN_WIDTH = width;
@@ -31,18 +31,20 @@ export default class Tutorial extends Component<{}> {
   constructor() {
     super();
     this.state = {
-      swipeIndex: 0
+      swipeIndex: 0,
     };
   }
 
   render() {
-    console.log(this.state.swipeIndex);
     let skipButton = <View />;
+
     if (this.state.swipeIndex != 2) {
       skipButton =
       <TouchableOpacity onPress={this.onSkipButtonPress} style={{marginLeft: 24}}>
         <Text style={styles.skipText}>Skip</Text>
       </TouchableOpacity>
+
+      pageSubtitle = 'Continue With:';
     }
 
     var doneButton = <View />;
@@ -50,6 +52,14 @@ export default class Tutorial extends Component<{}> {
       doneButton = <TouchableOpacity onPress={this.onSkipButtonPress} style={{marginRight: 24}}>
         <Text style={styles.skipText}>Done</Text>
       </TouchableOpacity>
+    }
+
+    let pageSubtitle = '';
+    
+    if (this.state.swipeIndex == 0) {
+      pageSubtitle = 'Continue With:';
+    } else {
+      pageSubtitle = 'Begin:';
     }
 
     return (
@@ -62,6 +72,7 @@ export default class Tutorial extends Component<{}> {
         <Swiper
           style={styles.wrapper}
           showsButtons={false}
+          paginationStyle={{height: 50}}
           onIndexChanged={this.onIndexChanged}
           loop={false}>
           <View style={styles.slide1}>
@@ -96,9 +107,13 @@ export default class Tutorial extends Component<{}> {
           </View>
         </Swiper>
 
+        <View style={{position: 'absolute', bottom: 70, width: '100%'}}>
+          <Text style={{fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', backgroundColor: 'transparent'}}>{pageSubtitle}</Text>
+        </View>
+
         <View style={styles.bottomContainer}>
-          <TouchableOpacity style={{width: '100%', justifyContent: 'center', alignItems: 'center'}} onPress={fbAuth}>
-              <Image source={require('../img/facebook_icon.png')} />
+          <TouchableOpacity style={{width: '100%', justifyContent: 'center', alignItems: 'center'}} onPress={() => loginUsingFacebook()}>
+              <Image style={{width: 13, height: 23}} source={require('../img/facebook_icon.png')} />
           </TouchableOpacity>
         </View>
       </View>

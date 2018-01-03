@@ -9,20 +9,34 @@ import {
   Platform,
   StyleSheet,
   Text,
+  TextInput,
   Image,
   View,
   TouchableOpacity,
   AsyncStorage,
   StatusBar,
-  ImageBackground
+  ImageBackground,
+  Alert
 } from 'react-native';
 
 import {Actions} from 'react-native-router-flux';
+import firebase from 'react-native-firebase';
 
-import Globals from '../Globals.js';
-import {fbAuth} from '../Helpers.js';
+import Globals from '../Globals';
+import {isEmpty, isValidEmail} from '../Helpers';
+
+const appStyles = require('../Styles');
 
 export default class EmailLogin extends Component<{}> {
+  constructor() {
+    super();
+
+    this.state = {
+      email: '',
+      password: ''
+    };
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -35,23 +49,94 @@ export default class EmailLogin extends Component<{}> {
           <Image style={{width: 40, height: 40}} source={require('../img/back_icon.png')} />
         </TouchableOpacity>
 
-        <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'center'}}>
+        <View style={styles.logo}>
+          <Image style={{width: 45, height: 45, borderRadius: 10}} source={require('../img/app_icon.png')} />
+        </View>
 
-          <Text style={styles.titleText}></Text>
+        <View style={appStyles.registerContainer}>
 
-            <ImageBackground resizeMode={'contain'} source={require('../img/input_field_background.png')}>
-              <Image style={{width: 20, height: 20, marginBottom: 5}} source={require('../img/icon_input_email.png')} />
-              <Text style={{marginLeft: 15, fontFamily: 'Avenir-Heavy', fontSize: 15, backgroundColor:'transparent', color: 'white'}}>Continue with Facebook</Text>
-            </ImageBackground>
+          <View style={[appStyles.inputContainer, {marginBottom: 5}]}>
+            <Image style={appStyles.inputIcon} source={require('../img/icon_input_email.png')} />
+            <TextInput
+              style={appStyles.inputText}
+              autoFocus={true}
+              autoCorrect={false}
+              autoCapitalize='none'
+              placeholder='Email address'
+              placeholderTextColor = '#9A99A9'
+              keyboardType = 'email-address'
+              onChangeText={(text) => this.setState({email: text})}
+              value={this.state.email}
+            />
+          </View>
 
-          <TouchableOpacity style={{marginTop: 30}} onPress={() => Actions.register()}>
-              <ImageBackground resizeMode={'contain'} style={styles.facebookButton} source={require('../img/btn_round_transparent.png')}>
-                <Text style={{marginLeft: 15, fontFamily: 'Avenir-Heavy', fontSize: 15, backgroundColor:'transparent', color: 'white'}}>Create Account</Text>
-              </ImageBackground>
+          <View style={appStyles.inputContainer}>
+            <Image style={appStyles.inputIcon} source={require('../img/icon_input_password.png')} />
+            <TextInput
+              style={appStyles.inputText}
+              autoCorrect={false}
+              autoCapitalize='none'
+              placeholder='Password'
+              placeholderTextColor='#9A99A9'
+              secureTextEntry={true}
+              onChangeText={(text) => this.setState({password: text})}
+              value={this.state.password}
+            />
+          </View>
+
+          <TouchableOpacity style={styles.submitButton} onPress={this.login.bind(this)}>
+            <Image style={{width: 280, height: 48}} source={require('../img/round_button_login.png')} />
+            <Text style={styles.submitText}>LOGIN</Text>
           </TouchableOpacity>
+
+          <View style={{position: 'absolute', zIndex: 1, width: '100%', bottom: 40, justifyContent: 'center', alignItems: 'center'}}>
+            <Text style={{fontFamily: 'Avenir-Heavy', color: '#9A99A9', fontSize: 14, marginBottom: 10}}>Not a member yet?</Text>
+
+            <TouchableOpacity onPress={this.register.bind(this)}>
+              <Text style={{fontFamily: 'Avenir-Heavy', color: '#00C99B', fontSize: 16}}>Register</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
       </View>
     );
+  }
+
+  validate() {
+    if (isEmpty(this.state.email)) {
+      Alert.alert(Globals.TEXT_LOGIN_EMAIL_REQUIRED);
+      return false;
+    } else if (!isValidEmail(this.state.email)) {
+      Alert.alert(Globals.TEXT_LOGIN_EMAIL_INVALID);
+      return false;
+    } else if (isEmpty(this.state.password)) {
+      Alert.alert(Globals.TEXT_LOGIN_PASSWORD_REQUIRED);
+      return false;
+    }
+
+    return true;
+  }
+
+  login() {
+    if (this.validate()) {
+      // sign in user
+      firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
+      .then(user => {
+        Actions.main({type: 'reset'});
+      })
+      .catch(function(error) {
+        console.log(error);
+        if (error.code == 'auth/user-disabled') {
+          Alert.alert(Globals.TEXT_LOGIN_ACCOUNT_DISABLED);
+        } else {
+          Alert.alert(Globals.TEXT_LOGIN_ACCOUNT_NOT_FOUND);
+        }
+      });
+    }
+  }
+
+  register() {
+    Actions.register();
   }
 }
 
@@ -60,7 +145,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#423747'
+    backgroundColor: 'white'//'#423747'
   },
   backIcon: {
     position: 'absolute',
@@ -69,27 +154,22 @@ const styles = StyleSheet.create({
     left: 12
   },
   logo: {
-    marginTop: 140,
+    position: 'absolute',
+    zIndex: 1,
+    top: 70
   },
-  titleText: {
-    marginTop: 15,
-    fontFamily: 'Avenir-Medium',
-    fontSize: 20,
-    color: 'white'
-  },
-  subtitleText: {
-    marginTop: 30,
-    textAlign: 'center',
-    width: 270,
-    fontFamily: 'Avenir-Medium',
-    fontSize: 15,
-    color: 'white',
-  },
-  facebookButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  submitButton: {
+    marginTop: 20,
+    marginBottom: 20,
     alignItems: 'center',
-    width: 280,
-    height: 48,
-  }
+    justifyContent: 'center'
+  },
+  submitText: {
+    position: 'absolute',
+    zIndex: 1,
+    fontFamily: 'Avenir-Heavy',
+    fontSize: 12,
+    color: 'white',
+    backgroundColor: 'transparent'
+  },
 });

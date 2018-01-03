@@ -109,7 +109,9 @@ export default class Discover extends Component<Props, State> {
           });
         }
       })
-      .catch(error => console.log(error));
+      .catch(error => {
+        console.log(error)
+      });
   }
 
   componentWillUnmount() {

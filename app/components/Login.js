@@ -20,7 +20,8 @@ import {
 import {Actions} from 'react-native-router-flux';
 
 import Globals from '../Globals.js';
-import {fbAuth} from '../Helpers.js';
+import {loginUsingFacebook, getCurrentUser} from '../Helpers.js';
+import FireBase from 'react-native-firebase';
 
 export default class Login extends Component<{}> {
   render() {
@@ -48,15 +49,15 @@ export default class Login extends Component<{}> {
             <Text>community of decorators and families from all over the world.</Text>
           </Text>
 
-          <TouchableOpacity style={{marginTop: 30}} onPress={fbAuth}>
-              <ImageBackground resizeMode={'contain'} style={styles.facebookButton} source={require('../img/btn_fb_blue.png')}>
-                <Image style={{width: 20, height: 20, marginBottom: 5}} source={require('../img/facebook_icon.png')} />
+          <TouchableOpacity style={{marginTop: 30}} onPress={() => loginUsingFacebook()}>
+              <ImageBackground resizeMode={'stretch'} style={styles.facebookButton} source={require('../img/btn_fb_blue.png')}>
+                <Image style={{width: 10, height: 17, marginBottom: 1}} source={require('../img/facebook_icon.png')} />
                 <Text style={{marginLeft: 15, fontFamily: 'Avenir-Heavy', fontSize: 15, backgroundColor:'transparent', color: 'white'}}>Continue with Facebook</Text>
               </ImageBackground>
           </TouchableOpacity>
 
           <TouchableOpacity style={{marginTop: 30}} onPress={() => Actions.register()}>
-              <ImageBackground resizeMode={'contain'} style={styles.facebookButton} source={require('../img/btn_round_transparent.png')}>
+              <ImageBackground resizeMode={'stretch'} style={styles.facebookButton} source={require('../img/btn_round_transparent.png')}>
                 <Text style={{marginLeft: 15, fontFamily: 'Avenir-Heavy', fontSize: 15, backgroundColor:'transparent', color: 'white'}}>Create Account</Text>
               </ImageBackground>
           </TouchableOpacity>

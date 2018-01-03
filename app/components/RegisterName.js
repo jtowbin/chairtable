@@ -28,18 +28,14 @@ import {userExists} from '../FirebaseHelpers';
 
 const appStyles = require('../Styles');
 
-export default class Register extends Component<{}> {
+export default class RegisterName extends Component<{}> {
   constructor() {
     super();
 
     this.state = {
-      email: '',
-      password: ''
+      firstName: '',
+      lastName: ''
     };
-
-    if (getCurrentUser()) {
-      firebase.auth().signOut();
-    }
   }
 
   render() {
@@ -58,22 +54,30 @@ export default class Register extends Component<{}> {
           <Image style={{width: 45, height: 45, borderRadius: 10}} source={require('../img/app_icon.png')} />
         </View>
 
-        <View style={appStyles.registerContainer}>
+       <View style={appStyles.registerContainer}>
 
-          <Text style={appStyles.registerLabelText}>What is your email?</Text>
+          <Text style={appStyles.registerLabelText}>What is your name?</Text>
 
           <View style={[appStyles.inputContainer, {marginBottom: 5}]}>
             <Image style={appStyles.inputIcon} source={require('../img/icon_input_email.png')} />
             <TextInput
               style={appStyles.inputText}
               autoFocus={true}
-              autoCorrect={false}
-              autoCapitalize='none'
-              placeholder='Email address'
+              placeholder='First name'
               placeholderTextColor = '#9A99A9'
-              keyboardType='email-address'
-              onChangeText={(text) => this.setState({email: text})}
-              value={this.state.email}
+              onChangeText={(text) => this.setState({firstName: text})}
+              value={this.state.firstName}
+            />
+          </View>
+
+          <View style={appStyles.inputContainer}>
+            <Image style={appStyles.inputIcon} source={require('../img/icon_input_email.png')} />
+            <TextInput
+              style={appStyles.inputText}
+              placeholder='Last name'
+              placeholderTextColor = '#9A99A9'
+              onChangeText={(text) => this.setState({lastName: text})}
+              value={this.state.lastName}
             />
           </View>
 
@@ -88,11 +92,11 @@ export default class Register extends Component<{}> {
   }
 
   validate() {
-    if (isEmpty(this.state.email)) {
-      Alert.alert(Globals.TEXT_LOGIN_EMAIL_REQUIRED);
+    if (isEmpty(this.state.firstName)) {
+      Alert.alert(Globals.TEXT_REGISTER_FIRST_NAME_REQUIRED);
       return false;
-    } else if (!isValidEmail(this.state.email)) {
-      Alert.alert(Globals.TEXT_LOGIN_EMAIL_INVALID);
+    } else if (isEmpty(this.state.lastName)) {
+      Alert.alert(Globals.TEXT_REGISTER_LAST_NAME_REQUIRED);
       return false;
     }
 
@@ -102,35 +106,11 @@ export default class Register extends Component<{}> {
   next() {
     if (!this.validate()) return;
 
-    firebase.auth()
-      .fetchProvidersForEmail(this.state.email)
-      .then(providers => {
-        console.log(providers);
-
-        if (providers.length > 0) {
-          if (providers.includes('password')) {
-            // a password is already set for this email
-            Alert.alert(Globals.TEXT_REGISTER_EMAIL_ALREADY_USED_WITH_PASSWORD);
-          } else if (providers.includes('facebook.com')) {
-            // notify that Facebook login is needed as the email address is already registered with Facebook
-            Alert.alert(Globals.TEXT_REGISTER_EMAIL_ALREADY_USED_FOR_FACEBOOK, null, [
-              {text: 'Cancel', style: 'cancel'},
-              {text: 'Login using Facebook', onPress: () => this.temporaryFacebookLogin()}
-            ]);
-          }
-        } else {
-          // it's the first account created with the provided email
-          Actions.registerName({email: this.state.email});
-        }
-      }, error => {
-        console.log('errormsg: ' + error);
-      });
-  }
-
-  temporaryFacebookLogin() {
-    fbAuth(result => {
-      Actions.registerPassword({email: this.state.email});
-    }, error => console.log(error));
+    Actions.registerBirthdate({
+      email: this.props.email,
+      firstName: this.state.firstName,
+      lastName: this.state.lastName,
+    });
   }
 }
 
@@ -157,6 +137,25 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 315,
+    height: 64,
+    backgroundColor: '#FBFAFF'
+  },
+  inputIcon: {
+    marginLeft: 22,
+    marginRight: 22,
+    width: 13,
+    height: 14
+  },
+  inputText: {
+    flex: 1,
+    marginRight: 22,
+    color: '#5F5D70',
+    fontFamily: 'Avenir-Heavy'
   },
   submitText: {
     position: 'absolute',

@@ -1,5 +1,10 @@
+/**
+ * App's general helper functions
+ */
+
 import {
-  AsyncStorage
+  AsyncStorage,
+  Alert
 } from 'react-native';
 
 import Globals from './Globals.js';
@@ -59,41 +64,61 @@ export function convertMapboxCoordinates(coordinate) {
   return [coordinate[1], coordinate[0]];
 }
 
-export function fbAuth() {
-  LoginManager.logInWithReadPermissions(['public_profile', 'email']).then(function(result) {
+export function isEmpty(value) {
+  if (value && value.trim().length > 0) {
+    return false;
+  }
+
+  return true;
+}
+
+export function isValidEmail(text) {
+  let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+  return (reg.test(text) !== false);
+}
+
+export function loginUsingFacebook() {
+  console.log('test');
+  fbAuth(result => {
+    // check if user exists (so we won't create it again in firebase)
+    userExists(getCurrentUser().uid, userExists => {
+      if (!userExists) {
+        // create user
+        firebase.database().ref('users/' + getCurrentUser().uid).set({
+          email:            result.email,
+          first_name:       result.first_name,
+          last_name:        result.last_name,
+          birthday:         result.birthday,
+          profile_picture:  result.picture.data.url
+        });
+      }
+
+      // mark tutorial as viewed (if user goes to facebook login directly from tutorial)
+      AsyncStorage.setItem(Globals.STORAGE_KEY_TUTORIAL_IS_VIEWED, "1");
+
+      return Actions.main({type: 'reset'})
+    });
+  }, () => {});
+}
+
+export function fbAuth(successCallback, failureCallback) {
+  LoginManager.logInWithReadPermissions(['public_profile', 'email', 'user_birthday']).then(function(result) {
        if (result.isCancelled) {
           console.log('Login was cancelled')
        } else {
           AccessToken.getCurrentAccessToken().then(function(accessTokenData) {
-
+console.log('accessToken', accessTokenData);
              const credential = firebase.auth.FacebookAuthProvider.credential(accessTokenData.accessToken)
              firebase.auth().signInWithCredential(credential).then(function(result) {
                 // Promise was successful
                 const responseDataCallback = (error, result) => {
                    if (error) {
                       console.log(error)
+                      failureCallback(error);
                    } else {
-                     // check if user exists (so we won't create it again in firebase)
-                     userExists(getCurrentUser().uid, userExists => {
-                       console.log('user exists: '+userExists);
-                       if (!userExists) {
-                         // create user
-                         firebase.database().ref('users/' + getCurrentUser().uid).set({
-                           email:            result.email,
-                           first_name:       result.first_name,
-                           last_name:        result.last_name,
-                           profile_picture:  result.picture.data.url
-                         });
-                       }
-
-                       // mark tutorial as viewed (if user goes to facebook login directly from tutorial)
-                       AsyncStorage.setItem(Globals.STORAGE_KEY_TUTORIAL_IS_VIEWED, "1");
-
-                       // mark user as logged in
-                       AsyncStorage.setItem(Globals.STORAGE_KEY_LOGGED_IN, "1");
-
-                       return Actions.main({type: 'reset'})
-                     });
+                     console.log('succ');
+                      successCallback(result);
                    }
                 }
 
@@ -103,7 +128,7 @@ export function fbAuth() {
                       accessToken: accessTokenData.accessToken.toString(),
                       parameters: {
                          fields: {
-                            string: 'id, first_name, last_name, email, picture'
+                            string: 'id, first_name, last_name, email, picture, birthday'
                          }
                       }
                    },
@@ -113,7 +138,11 @@ export function fbAuth() {
                 new GraphRequestManager().addRequest(dataRequest).start()
              }, function(error) {
                 // Promise was rejected
-                console.log(error)
+                if (error.code == 'auth/account-exists-with-different-credential') {
+                  Alert.alert(Globals.TEXT_REGISTER_EMAIL_ALREADY_USED_WITH_PASSWORD);
+                }
+
+                failureCallback(error);
              })
           })
        }

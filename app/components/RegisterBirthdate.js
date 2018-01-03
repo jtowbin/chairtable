@@ -21,25 +21,25 @@ import {
 
 import {Actions} from 'react-native-router-flux';
 import firebase from 'react-native-firebase';
+import DatePicker from 'react-native-datepicker';
 
 import Globals from '../Globals.js';
-import {fbAuth, getCurrentUser, isEmpty, isValidEmail} from '../Helpers.js';
+import {fbAuth, getCurrentUser, isEmpty} from '../Helpers.js';
 import {userExists} from '../FirebaseHelpers';
 
 const appStyles = require('../Styles');
 
-export default class Register extends Component<{}> {
+export default class RegisterBirthdate extends Component<{}> {
   constructor() {
     super();
 
     this.state = {
-      email: '',
-      password: ''
+      birthday: '',
     };
+  }
 
-    if (getCurrentUser()) {
-      firebase.auth().signOut();
-    }
+  componentDidMount() {
+    this.picker.onPressDate();
   }
 
   render() {
@@ -60,21 +60,41 @@ export default class Register extends Component<{}> {
 
         <View style={appStyles.registerContainer}>
 
-          <Text style={appStyles.registerLabelText}>What is your email?</Text>
+          <Text style={appStyles.registerLabelText}>When is your birthday?</Text>
 
           <View style={[appStyles.inputContainer, {marginBottom: 5}]}>
-            <Image style={appStyles.inputIcon} source={require('../img/icon_input_email.png')} />
-            <TextInput
-              style={appStyles.inputText}
-              autoFocus={true}
-              autoCorrect={false}
-              autoCapitalize='none'
-              placeholder='Email address'
-              placeholderTextColor = '#9A99A9'
-              keyboardType='email-address'
-              onChangeText={(text) => this.setState({email: text})}
-              value={this.state.email}
-            />
+            <DatePicker
+              ref={picker => this.picker = picker}
+              style={{width: '100%'}}
+              date={this.state.birthday}
+              mode="date"
+              placeholder="Birthday"
+              format="MM/DD/YYYY"
+              minDate="01/01/1900"
+              maxDate="01/01/2016"
+              confirmBtnText="Confirm"
+              cancelBtnText="Cancel"
+              customStyles={{
+                dateIcon: {
+                  position: 'absolute',
+                  left: 22,
+                  width: 15,
+                  height: 15,
+                },
+                dateInput: {
+                  marginLeft: 44+15,
+                  borderColor: 'transparent',
+                  alignItems: 'flex-start',
+                },
+                placeholderText : {
+                  color: '#5F5D70',
+                },
+                datePicker: {
+                  borderTopWidth: 0
+                },
+              }}
+              onDateChange={date => {this.setState({birthday: date})}} />
+
           </View>
 
           <TouchableOpacity style={styles.submitButton} onPress={this.next.bind(this)}>
@@ -88,11 +108,8 @@ export default class Register extends Component<{}> {
   }
 
   validate() {
-    if (isEmpty(this.state.email)) {
-      Alert.alert(Globals.TEXT_LOGIN_EMAIL_REQUIRED);
-      return false;
-    } else if (!isValidEmail(this.state.email)) {
-      Alert.alert(Globals.TEXT_LOGIN_EMAIL_INVALID);
+    if (isEmpty(this.state.birthday)) {
+      Alert.alert(Globals.TEXT_REGISTER_BIRTHDATE_REQUIRED);
       return false;
     }
 
@@ -102,35 +119,12 @@ export default class Register extends Component<{}> {
   next() {
     if (!this.validate()) return;
 
-    firebase.auth()
-      .fetchProvidersForEmail(this.state.email)
-      .then(providers => {
-        console.log(providers);
-
-        if (providers.length > 0) {
-          if (providers.includes('password')) {
-            // a password is already set for this email
-            Alert.alert(Globals.TEXT_REGISTER_EMAIL_ALREADY_USED_WITH_PASSWORD);
-          } else if (providers.includes('facebook.com')) {
-            // notify that Facebook login is needed as the email address is already registered with Facebook
-            Alert.alert(Globals.TEXT_REGISTER_EMAIL_ALREADY_USED_FOR_FACEBOOK, null, [
-              {text: 'Cancel', style: 'cancel'},
-              {text: 'Login using Facebook', onPress: () => this.temporaryFacebookLogin()}
-            ]);
-          }
-        } else {
-          // it's the first account created with the provided email
-          Actions.registerName({email: this.state.email});
-        }
-      }, error => {
-        console.log('errormsg: ' + error);
-      });
-  }
-
-  temporaryFacebookLogin() {
-    fbAuth(result => {
-      Actions.registerPassword({email: this.state.email});
-    }, error => console.log(error));
+    Actions.registerPassword({
+      email: this.props.email,
+      firstName: this.props.firstName,
+      lastName: this.props.lastName,
+      birthday: this.state.birthday
+    });
   }
 }
 

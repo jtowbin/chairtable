@@ -58,6 +58,8 @@ export default class Profile extends Component<Props, State> {
 
   constructor() {
     super();
+console.log(getCurrentUser().uid);
+
     this.state = {
       displays: [],
       refreshing: true,
@@ -85,10 +87,12 @@ export default class Profile extends Component<Props, State> {
 
           {/* the data of the logged in user */}
           <View style={{flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', marginTop: 30}}>
-            <Image
+            {
+              <Image
               style={{width: 100, height: 100, borderRadius: 50}}
-              source={{uri: getCurrentUser().photoURL}}
+              source={getCurrentUser().photoURL != null ? {uri: getCurrentUser().photoURL} : require('../img/profile_placeholder.png')}
             />
+          }
 
             <Text style={{fontFamily: 'Monaco', fontSize: 24, marginTop: 10}}>
               {getCurrentUser().displayName}

@@ -9,7 +9,8 @@ import {
   AsyncStorage
 } from 'react-native';
 
-import Globals from '../Globals.js';
+import Globals from '../Globals';
+import {getCurrentUser} from '../Helpers';
 import {Actions} from 'react-native-router-flux';
 import firebase from 'react-native-firebase';
 import CookieManager from 'react-native-cookies';
@@ -73,20 +74,14 @@ export default class Sidebar extends Component {
     }
 
     componentWillMount() {
-      firebase.auth().getCurrentUser().then((user) => {
+      let user = getCurrentUser();
+
+      if (user) {
         this.setState({
           email: user.email,
           displayName: user.displayName
         });
-      }).catch((error) => {
-        console.log('Some error occured:' + error)
-      });
-      // console.log(userId)
-      // firebase.database().ref('/users/' + userId).once('value').then(function(snapshot) {
-        // alert(snapshot)
-        // this.setState({email: snapshot.val().email});
-        // var username = (snapshot.val() && snapshot.val().username) || 'Anonymous';
-      // });
+      }
     }
 
     render() {
