@@ -243,7 +243,8 @@ export function userExists(userKey: string, callback) {
   firebaseRef
     .child(Globals.FIREBASE_TBL_USERS)
     .child(userKey)
-    .on('value', (snap) => {
+    .once('value')
+    .then(snap => {
       let userExists = (snap.val() != null);
       callback(userExists);
     });

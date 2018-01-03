@@ -388,6 +388,8 @@ export default class Map extends Component<{}> {
 
   // center map on user's location
   onCurrentLocationPressed = () => {
+this.map.showUserLocation = true;
+
     navigator
       .geolocation
       .getCurrentPosition(position => {
