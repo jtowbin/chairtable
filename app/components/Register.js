@@ -38,7 +38,8 @@ export default class Register extends Component<{}> {
     };
 
     if (getCurrentUser()) {
-      firebase.auth().signOut();
+      // firebase.auth().signOut();
+      console.log(getCurrentUser());
     }
   }
 

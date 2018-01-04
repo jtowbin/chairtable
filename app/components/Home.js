@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 
 import {Actions, Scene, Router} from 'react-native-router-flux'
+import firebase from 'react-native-firebase';
 
 import Globals from '../Globals';
 import {getCurrentUser} from '../Helpers';
@@ -29,13 +30,27 @@ export default class Discover extends Component<{}> {
         Actions.tutorial({type: 'reset'});
       } else {
         // check if user is logged in
-        if (getCurrentUser()) {
-          // logged in
-          Actions.main({type: 'reset'});
-        } else {
-          // not logged in
-          Actions.login({type: 'reset'});
-        }
+
+        let unsubscribe = firebase.auth().onAuthStateChanged(user => {
+          if (user) {
+            // User is signed in.
+            Actions.main({type: 'reset'});
+            unsubscribe();
+          } else {
+            // No user is signed in.
+            Actions.login({type: 'reset'});
+            unsubscribe();
+          }
+        });
+
+        // console.log(getCurrentUser());
+        // if (getCurrentUser()) {
+        //   // logged in
+        //   Actions.main({type: 'reset'});
+        // } else {
+        //   // not logged in
+        //   Actions.login({type: 'reset'});
+        // }
       }
     });
   }

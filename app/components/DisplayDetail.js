@@ -275,7 +275,7 @@ export default class DisplayDetail extends Component<Props, State> {
     updateRating(this.props.displayKey, getCurrentUser().uid, this.state.selectedRating, this.state.reviewText, () => {});
   }
 
-  onBackPressed() {A
+  onBackPressed() {
     Actions.pop({type: ActionConst.REFRESH});
   }
 
