@@ -1,7 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * Display creation screen
  */
 
 import React, { Component } from 'react';
@@ -26,7 +24,6 @@ import Globals from '../Globals';
 var ImagePicker = require('react-native-image-picker');
 var uuid = require('uuid-js');
 
-// More info on all the options is below in the README...just some common use cases shown here
 var options = {
   title: null,
   storageOptions: {
@@ -44,6 +41,9 @@ const CATEGORY_CHARITABLE = 'Charitable';
 
 export default class CreateDisplay extends Component<{}> {
 
+  /**
+   * Initial state
+   */
   constructor() {
     super();
     this.state = {
@@ -55,13 +55,16 @@ export default class CreateDisplay extends Component<{}> {
     };
   }
 
+  /**
+   * Render a photo
+   * 
+   * @param {number} index 
+   */
   renderPhotoItem(index) {
     if (this.state.avatarSource.length > index) {
       console.log(this.state.avatarSource);
       return (
-        /*<TouchableOpacity onPress={() => this.onAddCoverPhoto(index)}>*/
           <Image style={styles.cameraIcon} source={this.state.avatarSource[index]} />
-        /*</TouchableOpacity>*/
       );
     } else {
       return (
@@ -103,13 +106,9 @@ export default class CreateDisplay extends Component<{}> {
     }
 
     return (
-      // <View style={styles.container}>
-      // <KeyboardAvoidingView style={styles.container} behavior="padding">
-      // <View>
       <ImageBackground
         resizeMode={'cover'}
         source={require('../img/map_add_display.png')}
-        // style={{width: '100%', height: '100%'}}
         style={styles.container}
         >
         <View style={styles.navigation}>
@@ -200,11 +199,12 @@ export default class CreateDisplay extends Component<{}> {
         </ImageBackground>
 
       </ImageBackground>
-      // </View>
-      // </KeyboardAvoidingView>
     );
   }
 
+  /**
+   * Validate if title and images have been provided by user
+   */
   validateSubmit() {
     if (!this.state.displayTitle) {
       Alert.alert(Globals.TEXT_DISPLAY_ADD_TITLE_REQUIRED);
@@ -217,6 +217,9 @@ export default class CreateDisplay extends Component<{}> {
     return true;
   }
 
+  /**
+   * When a display category is selected
+   */
   onCategoryButtonPressed = (categoryType: string) => {
     var displayCategories = this.state.displayCategories;
     if (displayCategories.includes(categoryType)) {
@@ -230,10 +233,16 @@ export default class CreateDisplay extends Component<{}> {
     this.setState({displayCategories: displayCategories})
   }
 
+  /**
+   * When the cancel button is pressed
+   */
   onCancelPressed() {
     Actions.pop();
   }
 
+  /**
+   * When the save display button is pressed
+   */
   onSavePressed = () => {
 
     // validate input
@@ -252,12 +261,11 @@ export default class CreateDisplay extends Component<{}> {
 
       firebase.storage().ref('user_created').putFiles(this.state.avatarSource).then(metadatas => {
         // Get an array of file metadata
-        console.log(metadatas);
-
         var images = metadatas.map(metadata => {
           return metadata.downloadURL;
         })
 
+        // Create the display
         var item = {};
         item['Address'] = this.state.displayAddress;
         item['Categories'] = this.state.displayCategories;
@@ -279,43 +287,20 @@ export default class CreateDisplay extends Component<{}> {
 
         createDisplay(item, () => {});
       }).catch(function(error) {
-        // If any task fails, handle this
         console.log(error);
       });
-
-
-      // upload image to firebase storage
-      // var storageRef = firebase.storage().ref();
-      // var imagesRef = storageRef.child('user_created/' + uuid.create() + '.jpg');
-      // imagesRef.put(this.state.avatarSource[0].uri).then(snapshot => {
-      //   var item = {};
-      //   item['Address'] = this.state.displayAddress;
-      //   item['Category'] = this.state.displayCategory;
-      //   item['CellImage'] = snapshot.downloadURL;
-      //   item['Description'] = this.state.displayDescription;
-      //   item['DisplayName'] = this.state.displayTitle;
-      //   item['Facebook'] = '';
-      //   item['Images'] = [snapshot.downloadURL];
-      //   item['Last Date On'] = '';
-      //   item['Last Verified'] = '';
-      //   item['Latitude'] = position.coords.latitude;
-      //   item['Longitude'] = position.coords.longitude;
-      //   item['ParkingViewing info'] = '';
-      //   item['Title'] = this.state.displayTitle;
-      //   item['Video Aerial Drone'] = '';
-      //   item['Video links'] = '';
-      //   item['Walking Neighborhood'] = '';
-      //   item['Website'] = '';
-
-      //   createDisplay(item, () => {});
-      // }).catch(function(error) {
-      //   console.log(error);
-      // });
     });
 
+    // go back
     Actions.pop();
   }
 
+  /**
+   * Let user select a image from the device
+   * add the image to the avatarSource array
+   * 
+   * @param {number} index 
+   */
   onAddCoverPhoto(index) {
     ImagePicker.showImagePicker(options, (response) => {
       console.log('Response = ', response);
@@ -348,7 +333,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'flex-start',
-    // alignItems: 'fl',
     backgroundColor: 'white'
   },
   navigation: {
@@ -385,15 +369,13 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
-    // backgroundColor: 'blue'
+    justifyContent: 'flex-end'
   },
   inputContainer: {
     flex: 1,
     marginLeft: 20,
     marginRight: 20,
-    justifyContent: 'flex-end',
-    // backgroundColor: 'red'
+    justifyContent: 'flex-end'
   },
   addDisplayIcon: {
     alignItems: 'center'

@@ -1,7 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * The tutorial screen
  */
 
 import React, { Component } from 'react';
@@ -28,6 +26,9 @@ const SCREEN_WIDTH = width;
 const ASPECT_RATIO = width / height;
 
 export default class Tutorial extends Component<{}> {
+  /**
+   * Initial state
+   */
   constructor() {
     super();
     this.state = {
@@ -35,6 +36,9 @@ export default class Tutorial extends Component<{}> {
     };
   }
 
+  /**
+   * Render the screen
+   */
   render() {
     let skipButton = <View />;
 

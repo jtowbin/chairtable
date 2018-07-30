@@ -1,7 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * The discover screen (initial screen after login)
  */
 
 import React, { Component } from 'react';
@@ -83,12 +81,9 @@ export default class Discover extends Component<Props, State> {
   }
 
   componentDidMount() {
-    // Permissions.check('location').then(response => {
-    //   console.log('Response: ' + response);
-    // });
+    // ask for location permissions on the device
     Permissions.request('location', 'whenInUse')
       .then(response => {
-        console.log('Response: ' + response);
         if (response === 'whenInUse' || response == 'authorized') {
           // get user's current location
           navigator.geolocation.getCurrentPosition(
@@ -100,8 +95,6 @@ export default class Discover extends Component<Props, State> {
             },
           );
         } else if (response === 'denied') {
-          console.log('denied');
-
           this.finishedSearchingForPosition = true;
 
           fetchDisplays(this.state.pageOfDisplays, minimumDisplaysPerPage, items => {
@@ -118,13 +111,8 @@ export default class Discover extends Component<Props, State> {
     if (this.geoQuery) this.geoQuery.cancel();
    }
 
-  // user's location was successfully retrieved
+  // callback to be used when user's location was successfully retrieved
   locationSuccess = position => {
-    console.log('INITIAL POSITION: ' + position.coords.latitude + ' ' + position.coords.longitude);
-
-    // position.coords.latitude = 37.733795; position.coords.longitude =
-    // -122.446747;
-
     this.position = position;
 
     this.finishedSearchingForPosition = true;
@@ -142,9 +130,12 @@ export default class Discover extends Component<Props, State> {
     });
 
     console.log(error.message);
-    // this.setState({error: error.message})
   }
 
+  /**
+   * Called when the FlatList is refreshed by the user
+   * the disolays are fetched again
+   */
   refreshDisplays() {
     if (this.finishedSearchingForPosition) {
       if (this.position == undefined) {
@@ -159,9 +150,13 @@ export default class Discover extends Component<Props, State> {
     }
   }
 
+  /**
+   * Search for all displays for the specified coordinates and within established radius
+   * 
+   * @param {number} position    The GPS coordinates
+   */
   searchDisplaysBasedOnRadius(position) {
     if (this.geoQuery == null) {
-      console.log('geoquery null');
       // if we have no geo query yet, create a new one
       this.geoQuery = geofireRef.query({
         center: [
@@ -180,11 +175,15 @@ export default class Discover extends Component<Props, State> {
     }
   }
 
+  /**
+   * Get the new set of displays, using GeoFire criteria for the specified radius
+   * 
+   * @param {number} newRadius 
+   */
   searchDisplaysByChangingRadius(newRadius) {
     if (this.geoQuery) {
       this.searchRadius = newRadius;
 
-      console.log("radius changed to: " + newRadius);
       this.geoQuery.updateCriteria({
         radius: newRadius,
       });
@@ -193,8 +192,11 @@ export default class Discover extends Component<Props, State> {
     }
   }
 
+  /**
+   * Attach the GeoFire query callbacks
+   */
   attachGeoQueryCallbacks() {
-    console.log("Attach geo");
+    // when an item enters the surface covered by GeoFire
     var onKeyEnteredRegistration = this.geoQuery.on("key_entered", (key, location, distance) => {
       console.log(key + " entered the query at " + distance + " km distance!");
 
@@ -204,6 +206,7 @@ export default class Discover extends Component<Props, State> {
       this.foundDisplayKeys.push(value);
     });
 
+    // when an item exits the surface covered by GeoFire
     var onKeyExitedRegistration = this.geoQuery.on("key_exited", (key, location, distance) => {
       console.log(key + " exited the query at " + distance + " km distance!");
 
@@ -229,34 +232,29 @@ export default class Discover extends Component<Props, State> {
         return parseFloat(distance1) - parseFloat(distance2);
       });
 
-      console.log('displays count: ' + this.foundDisplayKeys.length + ' page: ' + this.pageOfDisplays);
       if (this.foundDisplayKeys.length < minimumDisplaysPerPage * this.pageOfDisplays && this.radiusIncrementAttempts < maximumRadiusIncrementAttempts) {
-        // we need more displays to show the next page, increase radius
-        // this.searchRadius += radiusIncrement;
-        // this.searchDisplaysByChangingRadius(this.searchRadius);
         this.loadMoreMessages();
       } else {
-        console.log('showing for radius: ' + this.searchRadius);
         this.numberOfRenderedDisplays = this.foundDisplayKeys.length;
 
         // calculate the corresponding page
         this.pageOfDisplays = parseInt(this.foundDisplayKeys.length / minimumDisplaysPerPage);
-        console.log('page of displays: ' + this.pageOfDisplays);
 
         // we have enough displays to show the next page, show displays
         this.loadDisplayItems(this.foundDisplayKeys, (items) => {
           this.setState({displays: items, refreshing: false});
         });
-      
-        console.log(this.foundDisplayKeys);
-        // geoQuery.cancel();
       }
     });
   }
 
+  /**
+   * Load display values based on provided display keys
+   * 
+   * @param {array} foundDisplayKeys 
+   * @param {callback} callback 
+   */
   loadDisplayItems(foundDisplayKeys, callback) {
-    console.log('called loadDisplayItems');
-
     Promise.all(
       foundDisplayKeys.map(item => {
         let displayKey = Object.keys(item)[0];
@@ -298,9 +296,10 @@ export default class Discover extends Component<Props, State> {
     .catch((error) => console.log(error));
   }
 
+  /**
+   * Load more displays
+   */
   loadMoreMessages () {
-    console.log('load more');
-
     if (this.finishedSearchingForPosition) {
       if (this.position == undefined) {
         this.setState(
@@ -352,13 +351,14 @@ export default class Discover extends Component<Props, State> {
             />
 
         </View>
-
-        { /*this.state.refreshing && this.renderLoader()*/ }
         
       </ImageBackground>
     );
   }
 
+  /**
+   * The item of the FlatList
+   */
   renderListItem = ({item}) => {
     return (
       <TouchableWithoutFeedback onPress={() => this.onDisplayPressed(item.key)}>
@@ -369,6 +369,9 @@ export default class Discover extends Component<Props, State> {
     );
   }
 
+  /**
+   * The loader indicator of the FlatList
+   */
   renderLoader() {
     return (<ActivityIndicator
       size="large"
@@ -381,6 +384,12 @@ export default class Discover extends Component<Props, State> {
     }}/>);
   }
 
+  /**
+   * Display's favorited state
+   * Returns true if display is favorited
+   * 
+   * @param {string} displayKey 
+   */
   isFavorited(displayKey: string) {
     const favoriteRef = firebase.database().ref(
       Globals.FIREBASE_TBL_USERS + '/' +
@@ -390,10 +399,16 @@ export default class Discover extends Component<Props, State> {
     return (favoriteRef != null);
   }
 
+  /**
+   * When menu button is pressed
+   */
   onMenuPressed() {
     Actions.drawerOpen();
   }
 
+  /**
+   * When a display is pressed
+   */
   onDisplayPressed = (key: string) => {
     Actions.displayDetail({
       displayKey: key
@@ -404,10 +419,7 @@ export default class Discover extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // width: undefined,
-    // height: undefined,
     justifyContent: 'center',
-    // alignItems: 'center',
     backgroundColor: 'transparent'
   },
   navigation: {

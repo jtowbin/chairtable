@@ -1,7 +1,7 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * The DisplayRatingView component
+ * 
+ * Wrapper of the RatingView component
  */
 
 import React, { Component } from 'react';

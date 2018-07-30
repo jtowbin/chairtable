@@ -1,7 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * The map screen
  */
 
 import React, { Component } from 'react';
@@ -28,7 +26,6 @@ import RatingView from './views/RatingView';
 
 import {fetchDisplays, fetchDisplay, toggleFavorite} from '../FirebaseHelpers';
 import {getCurrentUser, convertMapboxCoordinates} from '../Helpers';
-// import { feature } from '@turf/helpers';
 
 import turf from 'turf';
 import debounce from 'debounce';
@@ -41,6 +38,7 @@ const displaysRef = firebase.database().ref('/' + Globals.FIREBASE_TBL_DISPLAYS)
 const geofireDisplaysRef = firebase.database().ref(Globals.FIREBASE_TBL_DISPLAYS_LOCATIONS);
 const geofireRef = new GeoFire(geofireDisplaysRef);
 
+// set Mapbox's access token
 Mapbox.setAccessToken(Globals.MAPBOX_ACCESS_TOKEN);
 
 const layerStyles = Mapbox
@@ -104,6 +102,10 @@ const layerStyles = Mapbox
 
 export default class Map extends Component<{}> {
 
+  /**
+   * Default state and parameters
+   * @param {array} props 
+   */
   constructor(props) {
     super(props);
 
@@ -112,13 +114,16 @@ export default class Map extends Component<{}> {
 
     this.state = {
       source: null,
-      // nearbyItems: [],
       selectedDisplay: null,
-      // activeAnnotationIndex: -1,
-      // previousActiveAnnotationIndex: -1,
     };
   }
 
+  /**
+   * Add map feature (for each nearby location)
+   * 
+   * @param {string} location 
+   * @param {string} displayKey 
+   */
   createMapFeature(location, displayKey) {
     return {
       type : 'Feature',
@@ -133,6 +138,10 @@ export default class Map extends Component<{}> {
     };
   }
 
+  /**
+   * When map region is changed by the user
+   * calculate radius and query for items using GeoFire
+   */
   handleRegionDidChange(region) {
     let center = convertMapboxCoordinates(region.geometry.coordinates);
     let bounds = region.properties.visibleBounds;
@@ -159,12 +168,9 @@ export default class Map extends Component<{}> {
     }
   }
 
-  componentWillMount() {
-    // fetchDisplays(1, 50, (items) => {
-    //   this.setState({displays: items});
-    // });
-  }
-
+  /**
+   * Attach GeoFire callbacks
+   */
   attachGeoQueryCallbacks() {
     var onKeyEnteredRegistration = this.geoQuery.on("key_entered", (key, location, distance) => {
         let index = this.nearbyItems.findIndex(value => value['displayKey'] == key);
@@ -178,13 +184,6 @@ export default class Map extends Component<{}> {
           });
         }
       });
-
-    // var onKeyExitedRegistration = this.geoQuery.on("key_exited", (key, location, distance) => {
-    //     let index = this.nearbyItems.findIndex(value => value['displayKey'] == key);
-    //     if (index > -1) {
-    //       // this.nearbyItems.splice(index, 1);
-    //     }
-    //   });
 
     var onReadyRegistration = this.geoQuery.on("ready", () => {
         var features = [];
@@ -201,16 +200,6 @@ export default class Map extends Component<{}> {
         this.setState({
           source: source,
         });
-
-        // sort found displays by distance
-        // this
-        //   .foundDisplayKeys
-        //   .sort((item1, item2) => {
-        //     let distance1 = Object.values(item1)[0];
-        //     let distance2 = Object.values(item2)[0];
-
-        //     return parseFloat(distance1) - parseFloat(distance2);
-        //   });
       });
   }
 
@@ -358,6 +347,10 @@ export default class Map extends Component<{}> {
     );
   }
 
+  /**
+   * Map pin is pressed
+   * @param {Event} e 
+   */
   onShapePressed(e) {
     feature = e.nativeEvent.payload;
 
@@ -372,23 +365,34 @@ export default class Map extends Component<{}> {
     });
   }
 
+  /**
+   * Menu button is pressed
+   */
   onMenuPressed() {
     Actions.drawerOpen();
   }
 
+  /**
+   * Shown display close button is pressed
+   */
   onCloseDisplayPressed() {
     this.setState({
       selectedDisplay: null
     });
   }
 
+  /**
+   * When a display is created
+   */
   onCreateDisplayPressed() {
     Actions.createDisplay();
   }
 
-  // center map on user's location
+  /**
+   * Center map on user's location
+   */
   onCurrentLocationPressed = () => {
-this.map.showUserLocation = true;
+    this.map.showUserLocation = true;
 
     navigator
       .geolocation
@@ -400,10 +404,17 @@ this.map.showUserLocation = true;
       });
   }
 
+  /**
+   * When a display is pressed
+   */
   onDisplayPressed = (key: string) => {
     Actions.displayDetail({displayKey : key});
   }
 
+  /**
+   * Toggle display as favorited
+   * @param {string} displayKey 
+   */
   toggleFavoritePressed(displayKey: string) {
     let userId = getCurrentUser().uid;
 

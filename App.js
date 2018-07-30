@@ -1,7 +1,7 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * The entry point of the app
+ * 
+ * A navigation router is used to define all screens and how they can be reached
  */
 
 import React, { Component } from 'react';
@@ -33,18 +33,29 @@ import DisplayDetail from './app/components/DisplayDetail';
 
 import Sidebar from './app/components/Sidebar';
 
+/**
+ * The icons for the unselected tab
+ */
 const tabbarNormalIcons = {
   'discover': require('./app/img/tab_discover_normal.png'),
   'map': require('./app/img/tab_map_normal.png'),
   'profile': require('./app/img/tab_profile_normal.png'),
 };
 
+/**
+ * The icons for the selected tab
+ */
 const tabbarSelectedIcons = {
   'discover': require('./app/img/tab_discover_selected.png'),
   'map': require('./app/img/tab_map_selected.png'),
   'profile': require('./app/img/tab_profile_selected.png'),
 };
 
+/**
+ * Define how the icon of each tab should be shown
+ * 
+ * @param {array} props 
+ */
 const TabIcon = (props) => {
   return (
     <Image
@@ -61,6 +72,7 @@ export default class App extends Component<{}> {
 
         <Stack key="root">
 
+          {/* The screens of the app */}
           <Scene key="home" component={Home} hideNavBar={false}/>
           <Scene key="tutorial" component={Tutorial} hideNavBar />
           <Scene key="login" component={Login} hideNavBar />
@@ -73,12 +85,14 @@ export default class App extends Component<{}> {
           <Scene key="createDisplay" component={CreateDisplay} hideNavBar modal />
           <Scene key="displayDetail" component={DisplayDetail} hideNavBar />
 
+          {/* The drawer of the app */}
           <Drawer
             hideNavBar={true}
             key='main'
             contentComponent={Sidebar}
             drawerIcon={() => <Image source={require('./app/img/menu_icon.png')} />}>
 
+            {/* The bottom tabs: discover, map and profile */}
             <Tabs
               key="tabs"
               tabs
@@ -119,17 +133,8 @@ export default class App extends Component<{}> {
 }
 
 const styles = StyleSheet.create({
-  calcTabBarStyle: {
-    // backgroundColor: '#ddd',
-    // height: 80
-  },
-  tabBarStyle: {
-    // backgroundColor: '#ddd',
-  },
-  tabBarSelectedItemStyle: {
-    // backgroundColor: '#fff',
-  },
-  calcTabBarIconStyle: {
-    // height: 80
-  }
+  calcTabBarStyle: {},
+  tabBarStyle: {},
+  tabBarSelectedItemStyle: {},
+  calcTabBarIconStyle: {}
 });

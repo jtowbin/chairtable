@@ -1,7 +1,9 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * The DisplayView component
+ * 
+ * A wrapper of the DisplayRatingView component
+ * 
+ * DisplayView -> DisplayRatingView -> RatingView
  */
 
 import React, { Component } from 'react';
@@ -43,6 +45,11 @@ export default class DisplayView extends React.PureComponent<Props, State> {
     ratingComponentMargin: 20,
   };
 
+  /**
+   * Default state
+   * 
+   * @param {array} props 
+   */
   constructor(props: Props) {
     super(props);
 
@@ -71,6 +78,11 @@ export default class DisplayView extends React.PureComponent<Props, State> {
     );
   }
 
+  /**
+   * Toggle display as favorited
+   * 
+   * @param {string} displayKey 
+   */
   toggleFavoritePressed(displayKey: string) {
     let userId = getCurrentUser().uid;
 
@@ -81,6 +93,9 @@ export default class DisplayView extends React.PureComponent<Props, State> {
     });
   }
 
+  /**
+   * When menu button is pressed
+   */
   onMenuPressed() {
     Actions.drawerOpen();
   }

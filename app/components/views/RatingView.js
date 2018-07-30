@@ -1,7 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * The RatingView component
  */
 
 import React, { Component } from 'react';
@@ -55,11 +53,14 @@ export default class RatingView extends Component<Props, State> {
         />
 
         {!this.props.shouldHideText && this.renderRatingText(formattedRating)}
-        {/* <Text style={{marginLeft: 5, fontSize: 11, color: '#B2B1C1', fontFamily: 'Monaco'}}>{item.starCount} / 5.0 * 1.3 MI NEARBY</Text> */}
       </View>
     );
   }
 
+  /**
+   * The text of the rating
+   * @param {string} formattedRating 
+   */
   renderRatingText(formattedRating: string) {
     return (
       <Text style={[styles.ratingText, this.props.ratingTextStyle]}>{formattedRating}/5.0</Text>

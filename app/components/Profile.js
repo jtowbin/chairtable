@@ -1,7 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * The profile screen
  */
 
 import React, { Component } from 'react';
@@ -56,9 +54,11 @@ const tabMyReviews = 'tab_my_reviews';
 
 export default class Profile extends Component<Props, State> {
 
+  /**
+   * Default state
+   */
   constructor() {
     super();
-console.log(getCurrentUser().uid);
 
     this.state = {
       displays: [],
@@ -68,6 +68,9 @@ console.log(getCurrentUser().uid);
     };
   }
 
+  /**
+   * Loading all favorite displays and adding them to the initial state
+   */
   componentWillMount() {
     loadFavoriteDisplays(getCurrentUser().uid, items => {
       this.setState({displays: items, refreshing: false});
@@ -98,9 +101,6 @@ console.log(getCurrentUser().uid);
               {getCurrentUser().displayName}
             </Text>
 
-            {/* <Text style={{fontFamily: 'Avenir-Heavy', fontSize: 11, color: '#9A99A9'}}>
-              Seattle, Washington
-            </Text> */}
           </View>
 
           {/* the tabs and list */}
@@ -114,30 +114,20 @@ console.log(getCurrentUser().uid);
                   }, styles.tabText]}>FAVORITE DISPLAYS</Text>
                   <View style={[styles.tabBottomLine, {backgroundColor: (this.state.selectedTab == tabFavoriteDisplays) ? '#00CA9D' : 'transparent'}]} />
               </TouchableOpacity>
-              {/* <TouchableOpacity style={styles.tabContainer} onPress={() => this.onTabPressed(tabMyReviews)}>
-                  <Text style={[{
-                    color: (this.state.selectedTab == tabMyReviews) ? '#00CA9D' : '#9B9B9B'
-                  }, styles.tabText]}>MY REVIEWS</Text>
-                  <View style={[styles.tabBottomLine, {backgroundColor: (this.state.selectedTab == tabMyReviews) ? '#00CA9D' : 'transparent'}]} />
-              </TouchableOpacity> */}
             </View>
 
             {/* the list */}
             <FlatList
               style={{paddingLeft: listMarginSize, paddingRight: listMarginSize, backgroundColor: '#f6f6f9'}}
               showsVerticalScrollIndicator={false}
-              // refreshing={this.state.refreshing}
               data={this.state.displays}
               numColumns={2}
-              // onEndReached={this.loadMoreMessages.bind(this)}
-              // onEndReachedThreshold={0}
               keyExtractor={item => item.key}
               ItemSeparatorComponent={this.renderSeparator}
               ListHeaderComponent={this.renderHeader}
               ListFooterComponent={this.renderHeader}
               renderItem={({item}) =>
                 <TouchableWithoutFeedback onPress={() => this.onDisplayPressed(item.key)}>
-                  {/* <DisplayView item={item} style={styles.cardView} /> */}
                   <View style={styles.cardView}>
                     <Image style={{width: '100%', height: 160, resizeMode: 'cover'}} source={{uri: item.image}} />
                     <View style={{margin: 14}}>
@@ -153,34 +143,42 @@ console.log(getCurrentUser().uid);
     );
   }
 
+  /**
+   * The separator of the FlatList
+   */
   renderSeparator = () => {
     return (
       <View style={{height: listSeparatorSize}} />
     );
   }
 
+  /**
+   * The header of the FlatList
+   */
   renderHeader = () => {
     return (
       <View style={{height: listMarginSize}} />
     );
   }
 
+  /**
+   * Action when the menu button is pressed
+   */
   onMenuPressed() {
     Actions.drawerOpen();
   }
 
+  /**
+   * Setting the selected tab
+   * @param {string} selectedTab 
+   */
   onTabPressed(selectedTab: string) {
-    switch (selectedTab) {
-      case tabFavoriteDisplays:
-
-        break;
-      case tabMyReviews:
-        break;
-    }
-
     this.setState({selectedTab: selectedTab});
   }
 
+  /**
+   * Action when a list item is pressed
+   */
   onDisplayPressed = (key: string) => {
     Actions.displayDetail({displayKey : key});
   }
@@ -190,7 +188,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'flex-start',
-    // alignItems: 'fl',
     backgroundColor: 'white'
   },
   menuIcon: {

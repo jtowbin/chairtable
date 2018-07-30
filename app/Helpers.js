@@ -14,6 +14,9 @@ import {Actions} from 'react-native-router-flux';
 
 import {userExists} from './FirebaseHelpers';
 
+/**
+ * Saves a local variable on the device to mark tutorial as viewed
+ */
 export async function markTutorialAsViewed() {
   try {
     await AsyncStorage.setItem(STORAGE_KEY_TUTORIAL_IS_VIEWED, '1');
@@ -22,13 +25,16 @@ export async function markTutorialAsViewed() {
   }
 }
 
+/**
+ * Retrieving the state of a viewed tutorial
+ */
 export async function tutorialIsViewed() {
   let tutorialIsViewed = false;
 
   try {
     const value = await AsyncStorage.getItem(GLOBAL.STORAGE_KEY_TUTORIAL_IS_VIEWED);
 
-    if (value !== null){
+    if (value !== null) {
       tutorialIsViewed = true;
     }
   } catch (error) {
@@ -38,16 +44,26 @@ export async function tutorialIsViewed() {
   return tutorialIsViewed;
 }
 
+/**
+ * The logged in Firebase account
+ */
 export function getCurrentUser() {
   return firebase.auth().currentUser;
 }
 
+/**
+ * Formatting the value to one decimal
+ * @param {number} value 
+ */
 export function formatToOneDecimal(value: number): string {
   var rounded = Math.round( value * 10 ) / 10;
   return rounded.toFixed(1);
 }
 
-// calculate average rating
+/**
+ * Calculate average rating from an array of given ratings
+ * @param [number] ratings
+ */
 export function calculateAverageRating(ratings: [number]): number {
   let avgRating = 0;
   if (ratings.length) {
@@ -60,10 +76,18 @@ export function calculateAverageRating(ratings: [number]): number {
   return avgRating;
 }
 
+/**
+ * Re-order the location coordinates for Mapbox usage
+ * @param {array} coordinate 
+ */
 export function convertMapboxCoordinates(coordinate) {
   return [coordinate[1], coordinate[0]];
 }
 
+/**
+ * Returns true if a string is empty
+ * @param {string} value 
+ */
 export function isEmpty(value) {
   if (value && value.trim().length > 0) {
     return false;
@@ -72,14 +96,20 @@ export function isEmpty(value) {
   return true;
 }
 
+/**
+ * Returns true is an email is valid
+ * @param {string} text 
+ */
 export function isValidEmail(text) {
   let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
   return (reg.test(text) !== false);
 }
 
+/**
+ * Authenticates using Facebook, creates a new user in the database and goes to main screen
+ */
 export function loginUsingFacebook() {
-  console.log('test');
   fbAuth(result => {
     // check if user exists (so we won't create it again in firebase)
     userExists(getCurrentUser().uid, userExists => {
@@ -102,6 +132,11 @@ export function loginUsingFacebook() {
   }, () => {});
 }
 
+/**
+ * Login using Facebook with specific permissions
+ * @param {callback} successCallback 
+ * @param {callback} failureCallback 
+ */
 export function fbAuth(successCallback, failureCallback) {
   LoginManager.logInWithReadPermissions(['public_profile', 'email', 'user_birthday']).then(function(result) {
        if (result.isCancelled) {
@@ -117,7 +152,7 @@ console.log('accessToken', accessTokenData);
                       console.log(error)
                       failureCallback(error);
                    } else {
-                     console.log('succ');
+                     console.log('success');
                       successCallback(result);
                    }
                 }

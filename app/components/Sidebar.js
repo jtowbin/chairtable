@@ -1,3 +1,7 @@
+/**
+ * The left sidebar of the screen containing the menu
+ */
+
 import React, { Component } from 'react';
 
 import {
@@ -15,56 +19,10 @@ import {Actions} from 'react-native-router-flux';
 import firebase from 'react-native-firebase';
 import CookieManager from 'react-native-cookies';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    backgroundColor: '#00ca9d'
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 35,
-    marginLeft: 31
-  },
-  headerText: {
-    color: 'white',
-    fontSize: 21,
-    marginLeft: 10,
-  },
-  userDataContainer: {
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    marginTop: 50,
-    marginLeft: 36
-  },
-  nameText: {
-    color: 'white',
-    fontSize: 20,
-  },
-  emailText: {
-    color: 'white',
-    fontSize: 13,
-    marginTop: 5,
-  },
-  menuContainer: {
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    marginTop: 60,
-    marginLeft: 36
-  },
-  menuText: {
-    color: 'white',
-    fontSize: 16,
-    marginBottom: 25
-  },
-});
-
 export default class Sidebar extends Component {
+    /**
+     * Default state
+     */
     constructor() {
       super();
       this.state = {
@@ -73,6 +31,9 @@ export default class Sidebar extends Component {
       };
     }
 
+    /**
+     * Initial state
+     */
     componentWillMount() {
       let user = getCurrentUser();
 
@@ -105,12 +66,6 @@ export default class Sidebar extends Component {
               </View>
 
               <View style={styles.menuContainer}>
-                {/* <Text style={styles.menuText}>
-                  Notifications
-                </Text>
-                <Text style={styles.menuText}>
-                  Settings
-                </Text> */}
 
                 <TouchableOpacity onPress={this.onLogoutButtonPressed}>
                   <Text style={styles.menuText}>
@@ -123,6 +78,9 @@ export default class Sidebar extends Component {
         );
     }
 
+    /**
+     * The logout button procedure
+     */
     onLogoutButtonPressed() {
       CookieManager.clearAll();
       firebase.auth().signOut();
@@ -130,3 +88,52 @@ export default class Sidebar extends Component {
       Actions.login({type: 'reset'});
     }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    backgroundColor: '#00ca9d'
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 35,
+    marginLeft: 31
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 21,
+    marginLeft: 10
+  },
+  userDataContainer: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    marginTop: 50,
+    marginLeft: 36
+  },
+  nameText: {
+    color: 'white',
+    fontSize: 20
+  },
+  emailText: {
+    color: 'white',
+    fontSize: 13,
+    marginTop: 5
+  },
+  menuContainer: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    marginTop: 60,
+    marginLeft: 36
+  },
+  menuText: {
+    color: 'white',
+    fontSize: 16,
+    marginBottom: 25
+  }
+});

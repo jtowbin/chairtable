@@ -1,7 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * Birthday entry screen (part of the register steps)
  */
 
 import React, { Component } from 'react';

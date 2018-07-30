@@ -1,7 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * Helper file for Firebase operations
  */
 
 import firebase from 'react-native-firebase';
@@ -17,7 +15,9 @@ const firebaseRef = firebase.database().ref();
 const geofireDisplaysRef = firebase.database().ref(Globals.FIREBASE_TBL_DISPLAYS_LOCATIONS);
 const geofireRef = new GeoFire(geofireDisplaysRef);
 
-// retrieving displays from the firebase data set
+/**
+ * Retrieving displays from the firebase data set
+ */
 export function fetchDisplays(page: number, perPage: number, callback) {
     firebaseRef.child(Globals.FIREBASE_TBL_DISPLAYS)
       .limitToFirst((page + 1) * perPage)
@@ -45,22 +45,15 @@ export function fetchDisplays(page: number, perPage: number, callback) {
               isFavorited: isFavorited
             });
           }
-
-          // geofireRef.set(child.key, [child.val().Latitude, child.val().Longitude]);
-          //
-          // var values = child.val();
-          // values['Title'] = child.key;
-
-          // firebase.database().ref('user_displays_locations').remove();
-          // var key = firebase.database().ref('user_displays').push().key;
-          // firebase.database().ref('user_displays').child(key).set(values);
         });
 
         callback(items);
       });
 }
 
-// retrieving displays from the firebase data set
+/**
+ * Retrieving displays from the firebase data set
+ */
 export function fetchDisplay(displayKey: string, callback) {
   firebaseRef.child(Globals.FIREBASE_TBL_DISPLAYS).child(displayKey)
     .on('value', (snap) => {
@@ -88,7 +81,9 @@ export function fetchDisplay(displayKey: string, callback) {
     });
 }
 
-// load user's favorited displays
+/**
+ * Load user's favorited displays
+ */
 export function loadFavoriteDisplays(userKey: string, callback) {
   const favoriteDisplaysRef = firebaseRef
     .child(Globals.FIREBASE_TBL_USERS)
@@ -135,6 +130,12 @@ export function loadFavoriteDisplays(userKey: string, callback) {
   });
 }
 
+/**
+ * Toggle a display as favorited
+ * @param {string} userKey 
+ * @param {string} displayKey 
+ * @param {callback} callback 
+ */
 export function toggleFavorite(userKey: string, displayKey: string, callback) {
   console.log('userKey: ' + userKey);
   console.log('displayKey: ' + displayKey);
@@ -168,7 +169,9 @@ export function toggleFavorite(userKey: string, displayKey: string, callback) {
   });
 }
 
-// retrieve user's feedback on a display
+/**
+ * Retrieve user's feedback on a display
+ */
 export function fetchRating(userKey: string, displayKey: string, callback) {
   firebaseRef.child(Globals.FIREBASE_TBL_REVIEWS)
     .orderByChild('displayUserKey')
@@ -181,7 +184,9 @@ export function fetchRating(userKey: string, displayKey: string, callback) {
     });
 }
 
-// retrieve all reviews for one display
+/**
+ * Retrieve all reviews for one display
+ */
 export function fetchRatingsForDisplay(displayKey: string, callback) {
   firebaseRef.child(Globals.FIREBASE_TBL_REVIEWS)
     .orderByChild('displayKey')
@@ -208,7 +213,9 @@ export function fetchRatingsForDisplay(displayKey: string, callback) {
     });
 }
 
-// set rating for a display
+/**
+ * Set rating for a display
+ */
 export function updateRating(displayKey: string, userKey: number, rating: number, review: string, callback) {
   let reviewsRef = firebaseRef.child(Globals.FIREBASE_TBL_REVIEWS);
 
@@ -238,7 +245,9 @@ export function updateRating(displayKey: string, userKey: number, rating: number
   callback();
 }
 
-// check if user already exists
+/**
+ * Check if user already exists
+ */
 export function userExists(userKey: string, callback) {
   firebaseRef
     .child(Globals.FIREBASE_TBL_USERS)
@@ -250,7 +259,25 @@ export function userExists(userKey: string, callback) {
     });
 }
 
-// create a new display
+/**
+ * Get user's additional data
+ */
+export function fetchUserDetails(userKey : string, callback) {
+  firebaseRef
+    .child(Globals.FIREBASE_TBL_USERS)
+    .child(userKey)
+    .on('value', snap => {
+      var item = {
+        birthday: snap.val().birthday,
+      };
+
+      callback(item);
+    });
+}
+
+/**
+ * Create a new display
+ */
 export function createDisplay(item, callback) {
   var displayKey = firebaseRef.child(Globals.FIREBASE_TBL_DISPLAYS).push().key;
   firebaseRef.child(Globals.FIREBASE_TBL_DISPLAYS).child(displayKey).set(item);

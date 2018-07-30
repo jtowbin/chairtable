@@ -1,7 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * Login using email and password
  */
 
 import React, { Component } from 'react';
@@ -102,6 +100,9 @@ export default class EmailLogin extends Component<{}> {
     );
   }
 
+  /**
+   * Validate user's input
+   */
   validate() {
     if (isEmpty(this.state.email)) {
       Alert.alert(Globals.TEXT_LOGIN_EMAIL_REQUIRED);
@@ -117,6 +118,9 @@ export default class EmailLogin extends Component<{}> {
     return true;
   }
 
+  /**
+   * Login using provided email and password
+   */
   login() {
     if (this.validate()) {
       // sign in user
@@ -135,6 +139,9 @@ export default class EmailLogin extends Component<{}> {
     }
   }
 
+  /**
+   * Go to register screen
+   */
   register() {
     Actions.register();
   }

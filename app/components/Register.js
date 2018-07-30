@@ -1,7 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * Email and password - final registration step
  */
 
 import React, { Component } from 'react';
@@ -29,6 +27,9 @@ import {userExists} from '../FirebaseHelpers';
 const appStyles = require('../Styles');
 
 export default class Register extends Component<{}> {
+  /**
+   * Default state
+   */
   constructor() {
     super();
 
@@ -36,11 +37,6 @@ export default class Register extends Component<{}> {
       email: '',
       password: ''
     };
-
-    if (getCurrentUser()) {
-      // firebase.auth().signOut();
-      console.log(getCurrentUser());
-    }
   }
 
   render() {
@@ -88,6 +84,9 @@ export default class Register extends Component<{}> {
     );
   }
 
+  /**
+   * Validate email provided by user
+   */
   validate() {
     if (isEmpty(this.state.email)) {
       Alert.alert(Globals.TEXT_LOGIN_EMAIL_REQUIRED);
@@ -100,14 +99,15 @@ export default class Register extends Component<{}> {
     return true;
   }
 
+  /**
+   * Proceed with authenticating registered user
+   */
   next() {
     if (!this.validate()) return;
 
     firebase.auth()
       .fetchProvidersForEmail(this.state.email)
       .then(providers => {
-        console.log(providers);
-
         if (providers.length > 0) {
           if (providers.includes('password')) {
             // a password is already set for this email
@@ -128,6 +128,10 @@ export default class Register extends Component<{}> {
       });
   }
 
+  /**
+   * After registration, login only temporary using Facebook
+   * if Facebook is the only available provider
+   */
   temporaryFacebookLogin() {
     fbAuth(result => {
       Actions.registerPassword({email: this.state.email});

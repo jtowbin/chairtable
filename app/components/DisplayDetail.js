@@ -1,7 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * Detailed display screen
  */
 
 import React, { Component } from 'react';
@@ -57,6 +55,10 @@ type State = {
 };
 
 export default class DisplayDetail extends Component<Props, State> {
+  /**
+   * Default state
+   * @param {array} props 
+   */
   constructor(props: Props) {
       super(props);
 
@@ -69,6 +71,9 @@ export default class DisplayDetail extends Component<Props, State> {
       };
   }
 
+  /**
+   * Initial state, set by fetching the display and ratings
+   */
   componentWillMount() {
     fetchDisplay(this.props.displayKey, (item) => {
       this.setState({
@@ -99,6 +104,9 @@ export default class DisplayDetail extends Component<Props, State> {
     );
   }
 
+  /**
+   * The layout of the display
+   */
   getDisplayView() {
     return (<View style={{flex: 1, backgroundColor: 'white'}}>
       <View style={styles.cardView}>
@@ -117,12 +125,10 @@ export default class DisplayDetail extends Component<Props, State> {
 
       </View>
 
+      {/* list display's reviews */}
       <FlatList
         showsVerticalScrollIndicator={false}
-        // refreshing={this.state.refreshing}
         data={this.state.displayReviews}
-        // onEndReached={this.loadMoreMessages.bind(this)}
-        // onEndReachedThreshold={0}
         keyExtractor={item => item.displayUserKey}
         ItemSeparatorComponent={this.renderSeparator}
         ListHeaderComponent={this.renderHeader}
@@ -209,24 +215,36 @@ export default class DisplayDetail extends Component<Props, State> {
     </View>);
   }
 
+  /**
+   * Button to show complete text 
+   */
   _renderTruncatedFooter = (handlePress) => {
     return (
       <Text style={styles.readMoreFooterText} onPress={handlePress}>More</Text>
     );
   }
 
+  /**
+   * Button to show truncated text
+   */
   _renderRevealedFooter = (handlePress) => {
     return (
       <Text style={styles.readMoreFooterText} onPress={handlePress}>Less</Text>
     );
   }
 
+  /**
+   * FlatList's separator
+   */
   renderSeparator = () => {
     return (
       <View style={{flex: 1, height: 1, backgroundColor: '#bbbbbb'}} />
     );
   }
 
+  /**
+   * FlatList's header
+   */
   renderHeader = () => {
     return (
       <View style={{backgroundColor: 'white'}}>
@@ -264,6 +282,9 @@ export default class DisplayDetail extends Component<Props, State> {
     );
   }
 
+  /**
+   * When the cancel button is pressed on the review
+   */
   onReviewCancelPress() {
     this.setState({
       selectedRating: 0,
@@ -271,14 +292,24 @@ export default class DisplayDetail extends Component<Props, State> {
     });
   }
 
+  /**
+   * When the save button is pressed on the review
+   */
   onReviewSavePress() {
     updateRating(this.props.displayKey, getCurrentUser().uid, this.state.selectedRating, this.state.reviewText, () => {});
   }
 
+  /**
+   * When the back button is pressed
+   */
   onBackPressed() {
     Actions.pop({type: ActionConst.REFRESH});
   }
 
+  /**
+   * When a star is selected
+   * @param {number} rating 
+   */
   onStarRatingPress(rating: number) {
     this.setState({
       selectedRating: rating,
