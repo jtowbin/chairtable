@@ -1,53 +1,54 @@
 {
-	"name": "chairtable",
-	"version": "0.0.1",
-	"private": true,
-	"scripts": {
-		"start": "node node_modules/react-native/local-cli/cli.js start",
-		"build": "babel app/ -d lib/",
-		"prepublish": "npm run build",
-		"test": "jest",
-		"flow": "flow"
-	},
-	"dependencies": {
-		"@mapbox/geo-viewport": "^0.2.2",
-		"@mapbox/react-native-mapbox-gl": "^6.0.2",
-		"babel-preset-es2015": "^6.24.1",
-		"babel-preset-stage-2": "^6.24.1",
-		"debounce": "^1.1.0",
-		"firebase": "^4.8.1",
-		"geofire": "^4.1.2",
-		"moment": "^2.20.1",
-		"react": "16.0.0",
-		"react-moment": "^0.6.8",
-		"react-native": "^0.51.0",
-		"react-native-cookies": "^3.2.0",
-		"react-native-datepicker": "^1.6.0",
-		"react-native-easy-grid": "^0.1.15",
-		"react-native-fbsdk": "^0.6.3",
-		"react-native-firebase": "^3.2.0",
-		"react-native-image-picker": "^0.26.7",
-		"react-native-permissions": "^1.0.6",
-		"react-native-popup-dialog": "^0.10.44",
-		"react-native-read-more-text": "^1.0.0",
-		"react-native-router-flux": "^4.0.0-beta.24",
-		"react-native-star-rating": "^1.0.8",
-		"react-native-super-grid": "^2.0.1",
-		"react-native-swiper": "^1.5.13",
-		"react-native-timeago": "^0.4.0",
-		"turf": "^3.0.14",
-		"uuid-js": "^0.7.5"
-	},
-	"devDependencies": {
-		"babel-cli": "^6.26.0",
-		"babel-jest": "21.2.0",
-		"babel-preset-flow": "^6.23.0",
-		"babel-preset-react-native": "4.0.0",
-		"flow-bin": "^0.61.0",
-		"jest": "21.2.1",
-		"react-test-renderer": "16.0.0"
-	},
-	"jest": {
-		"preset": "react-native"
-	}
+  "name": "chairtable",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "build": "babel app/ -d lib/",
+    "prepublish": "npm run build",
+    "test": "jest",
+    "flow": "flow"
+  },
+  "dependencies": {
+    "@mapbox/geo-viewport": "^0.2.2",
+    "@mapbox/react-native-mapbox-gl": "^6.0.2",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "debounce": "^1.1.0",
+    "firebase": "^4.8.1",
+    "geofire": "^4.1.2",
+    "moment": "^2.20.1",
+    "react": "16.0.0",
+    "react-moment": "^0.6.8",
+    "react-native": "^0.51.0",
+    "react-native-cookies": "^3.2.0",
+    "react-native-datepicker": "^1.6.0",
+    "react-native-easy-grid": "^0.1.15",
+    "react-native-fbsdk": "^0.6.3",
+    "react-native-firebase": "^3.2.0",
+    "react-native-google-maps-directions": "^2.0.0",
+    "react-native-image-picker": "^0.26.7",
+    "react-native-permissions": "^1.0.6",
+    "react-native-popup-dialog": "^0.10.44",
+    "react-native-read-more-text": "^1.0.0",
+    "react-native-router-flux": "^4.0.0-beta.24",
+    "react-native-star-rating": "^1.0.8",
+    "react-native-super-grid": "^2.0.1",
+    "react-native-swiper": "^1.5.13",
+    "react-native-timeago": "^0.4.0",
+    "turf": "^3.0.14",
+    "uuid-js": "^0.7.5"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-jest": "21.2.0",
+    "babel-preset-flow": "^6.23.0",
+    "babel-preset-react-native": "4.0.0",
+    "flow-bin": "^0.61.0",
+    "jest": "21.2.1",
+    "react-test-renderer": "16.0.0"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
 }

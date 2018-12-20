@@ -4,8 +4,10 @@
 
 import {
   AsyncStorage,
-  Alert
+  Alert,
+  Linking
 } from 'react-native';
+import getDirections from 'react-native-google-maps-directions';
 
 import Globals from './Globals.js';
 import FBSDK, { LoginButton, LoginManager, AccessToken, GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
@@ -184,4 +186,31 @@ console.log('accessToken', accessTokenData);
     }, function(error) {
        console.log('Some error occured:' + error)
     })
+}
+
+export function openDirectionInMap(map, source, destination) {
+  if (map === Globals.MAPS) {
+    openDirectionWithIOSMap(source, destination);
+  } else if (map === Globals.GOOGLE_MAPS) {
+    openDirectionWithGoogleMap(source, destination);
+  }
+}
+
+function openDirectionWithGoogleMap(source, destination) {
+  const data = {
+    source,
+    destination,
+    params: [
+      {
+        key: "dir_action",
+        value: "navigate"       // this instantly initializes navigation using the given travel mode 
+      }
+    ]
+  }
+
+  getDirections(data);
+}
+
+function openDirectionWithIOSMap(source, destination) {
+  Linking.openURL(`http://maps.apple.com/maps?saddr=${source.latitude}+${source.longitude}&daddr=${destination.latitude}+${destination.longitude}`)
 }

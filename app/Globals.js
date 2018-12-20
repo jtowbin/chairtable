@@ -49,4 +49,12 @@ module.exports = {
   TEXT_REGISTER_BIRTHDATE_REQUIRED : 'Please choose your birthdate.',
   TEXT_REGISTER_PASSWORD_TOO_SHORT : 'The password should be at least 6 characters long.',
   TEXT_REGISTER_PASSWORDS_DIFFERENT : 'The passwords don\'t match.',
+
+  DIRECTION_OPTION_OPEN_IN_MAPS: 'Open in Maps',
+  DIRECTION_OPTION_OPEN_IN_GOOGLE_MAPS: 'Open in Google Maps',
+  DIRECTION_OPTION_COPY_ADDRESS: 'Copy Address',
+
+  USER_MAP_PREFERENCE: 'USER_MAP_PREFERENCE',
+  MAPS: 'Maps',
+  GOOGLE_MAPS: 'Google Maps'
 };

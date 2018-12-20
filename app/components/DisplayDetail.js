@@ -14,18 +14,23 @@ import {
   ScrollView,
   TextInput,
   FlatList,
+  ActionSheetIOS,
+  Clipboard,
+  AsyncStorage,
+  Alert
 } from 'react-native';
+import Permissions from 'react-native-permissions';
 
 import firebase from 'react-native-firebase';
 import StarRating from 'react-native-star-rating';
-import {Actions, ActionConst} from 'react-native-router-flux';
+import { Actions, ActionConst } from 'react-native-router-flux';
 import ReadMore from 'react-native-read-more-text';
-import PopupDialog, {DialogButton} from 'react-native-popup-dialog';
+import PopupDialog, { DialogButton } from 'react-native-popup-dialog';
 import TimeAgo from 'react-native-timeago';
 
 import DisplayRatingView from './views/DisplayRatingView';
 import RatingView from './views/RatingView';
-import {getCurrentUser} from '../Helpers';
+import { getCurrentUser, openDirectionInMap } from '../Helpers';
 import {
   fetchDisplay,
   updateRating,
@@ -60,15 +65,15 @@ export default class DisplayDetail extends Component<Props, State> {
    * @param {array} props 
    */
   constructor(props: Props) {
-      super(props);
+    super(props);
 
-      this.state = {
-        display: null,
-        refreshing: true,
-        selectedRating: 0,
-        reviewText: '',
-        displayReviews: [],
-      };
+    this.state = {
+      display: null,
+      refreshing: true,
+      selectedRating: 0,
+      reviewText: '',
+      displayReviews: [],
+    };
   }
 
   /**
@@ -88,7 +93,7 @@ export default class DisplayDetail extends Component<Props, State> {
       });
     });
 
-    fetchRatingsForDisplay(this.props.displayKey, reviews => this.setState({displayReviews: reviews}));
+    fetchRatingsForDisplay(this.props.displayKey, reviews => this.setState({ displayReviews: reviews }));
   }
 
   render() {
@@ -96,10 +101,10 @@ export default class DisplayDetail extends Component<Props, State> {
       <View style={styles.container}>
 
         <TouchableOpacity style={styles.backIcon} onPress={this.onBackPressed}>
-          <Image style={{width: 40, height: 40}} source={require('../img/back_icon.png')} />
+          <Image style={{ width: 40, height: 40 }} source={require('../img/back_icon.png')} />
         </TouchableOpacity>
 
-        { this.state.display && this.getDisplayView() }
+        {this.state.display && this.getDisplayView()}
       </View>
     );
   }
@@ -108,10 +113,12 @@ export default class DisplayDetail extends Component<Props, State> {
    * The layout of the display
    */
   getDisplayView() {
-    return (<View style={{flex: 1, backgroundColor: 'white'}}>
+    console.log(this.state.display);
+
+    return (<View style={{ flex: 1, backgroundColor: 'white' }}>
       <View style={styles.cardView}>
         <Image
-          style={{width: '100%', height: 200, resizeMode: 'cover'}}
+          style={{ width: '100%', height: 200, resizeMode: 'cover' }}
           source={{
             uri: this.state.display.image,
             cache: 'force-cache'
@@ -120,9 +127,17 @@ export default class DisplayDetail extends Component<Props, State> {
         <DisplayRatingView
           item={this.state.display}
           margin={20} />
-
-          <Text style={{marginLeft: 20, marginRight: 20, marginBottom: 20}}>{this.state.display.address}</Text>
-
+        <View style={{ width: '100%', marginBottom: 20, flexDirection: 'row' }}>
+          <Text style={{ paddingRight: 20, paddingLeft: 20, width: '50%' }}>{this.state.display.address}</Text>
+          <View style={{ paddingRight: 20, paddingLeft: 20, width: '50%' }}>
+            <TouchableOpacity onPress={this.onDirection.bind(this)}>
+              <ImageBackground resizeMode={'stretch'} style={styles.directionButton} source={require('../img/round_button_login.png')}>
+                <Image style={{width: 15, height: 17, marginBottom: 1}} resizeMode={'contain'} source={require('../img/directions_arrow.png')} />
+                <Text style={styles.directionText}>Direction</Text>
+              </ImageBackground>
+          </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       {/* list display's reviews */}
@@ -132,24 +147,24 @@ export default class DisplayDetail extends Component<Props, State> {
         keyExtractor={item => item.displayUserKey}
         ItemSeparatorComponent={this.renderSeparator}
         ListHeaderComponent={this.renderHeader}
-        renderItem={({item}) =>
-          <View style={{flexDirection: 'row'}}>
+        renderItem={({ item }) =>
+          <View style={{ flexDirection: 'row' }}>
             <Image
-              style={{margin: 20, width: 50, height: 50, borderRadius: 25}}
+              style={{ margin: 20, width: 50, height: 50, borderRadius: 25 }}
               source={{
                 uri: item.userPhoto,
                 cache: 'force-cache'
               }} />
-            <View style={{flex: 1, marginTop: 25, marginBottom: 10, flexDirection: 'column'}}>
-              <Text style={{marginBottom: 5, fontWeight: 'bold', fontSize: 16}}>{item.userName}</Text>
+            <View style={{ flex: 1, marginTop: 25, marginBottom: 10, flexDirection: 'column' }}>
+              <Text style={{ marginBottom: 5, fontWeight: 'bold', fontSize: 16 }}>{item.userName}</Text>
 
               <RatingView
                 shouldHideText={true}
                 rating={item.rating} />
 
-              <Text style={{marginTop: 20, fontFamily: 'Monaco', fontSize: 14}}>{item.review}</Text>
+              <Text style={{ marginTop: 20, fontFamily: 'Monaco', fontSize: 14 }}>{item.review}</Text>
 
-              <View style={{alignItems: 'flex-end', marginTop: 10, marginRight: 10}}>
+              <View style={{ alignItems: 'flex-end', marginTop: 10, marginRight: 10 }}>
                 <TimeAgo time={item.date} />
               </View>
             </View>
@@ -164,7 +179,7 @@ export default class DisplayDetail extends Component<Props, State> {
         dismissOnTouchOutside={false}
         actions={[
           <View
-            style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end'}}
+            style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end' }}
             key="button-set-1">
             <DialogButton
               text="CANCEL"
@@ -172,23 +187,23 @@ export default class DisplayDetail extends Component<Props, State> {
                 this.popupDialog.dismiss();
                 this.onReviewCancelPress();
               }}
-               />
+            />
             <DialogButton
               text="RATE"
               onPress={() => {
                 this.popupDialog.dismiss();
                 this.onReviewSavePress();
               }}
-               />
+            />
           </View>
         ]}
       >
-        <View style={{flex: 1, alignItems: 'center'}}>
-          <Text style={{margin: 10, fontSize: 16, fontFamily: 'Monaco'}}>Rate this display</Text>
-          <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 20, marginBottom: 10}}>
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          <Text style={{ margin: 10, fontSize: 16, fontFamily: 'Monaco' }}>Rate this display</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20, marginBottom: 10 }}>
             <StarRating
               disabled={false}
-              starStyle={{marginLeft: 5, marginRight: 5}}
+              starStyle={{ marginLeft: 5, marginRight: 5 }}
               starSize={30}
               emptyStar={require('../img/star_large_empty.png')}
               fullStar={require('../img/star_large_full.png')}
@@ -201,7 +216,7 @@ export default class DisplayDetail extends Component<Props, State> {
 
           <TextInput
             style={styles.reviewText}
-            onChangeText={(text) => this.setState({reviewText: text})}
+            onChangeText={(text) => this.setState({ reviewText: text })}
             value={this.state.reviewText}
             multiline={true}
             blurOnSubmit={true}
@@ -238,7 +253,7 @@ export default class DisplayDetail extends Component<Props, State> {
    */
   renderSeparator = () => {
     return (
-      <View style={{flex: 1, height: 1, backgroundColor: '#bbbbbb'}} />
+      <View style={{ flex: 1, height: 1, backgroundColor: '#bbbbbb' }} />
     );
   }
 
@@ -247,25 +262,25 @@ export default class DisplayDetail extends Component<Props, State> {
    */
   renderHeader = () => {
     return (
-      <View style={{backgroundColor: 'white'}}>
-        <View style={{backgroundColor: '#f9f9f9', height: 60, justifyContent: 'center'}}>
-          <Text style={{marginLeft: 20, color: 'black', fontWeight: 'bold'}}>OVERVIEW</Text>
+      <View style={{ backgroundColor: 'white' }}>
+        <View style={{ backgroundColor: '#f9f9f9', height: 60, justifyContent: 'center' }}>
+          <Text style={{ marginLeft: 20, color: 'black', fontWeight: 'bold' }}>OVERVIEW</Text>
         </View>
-        <View style={{paddingTop: 10, paddingLeft: 20, paddingRight: 20}}>
+        <View style={{ paddingTop: 10, paddingLeft: 20, paddingRight: 20 }}>
           <ReadMore
-              numberOfLines={3}
-              renderTruncatedFooter={this._renderTruncatedFooter}
-              renderRevealedFooter={this._renderRevealedFooter}
-              onReady={this._handleTextReady}>
-              <Text style={{fontFamily: 'Monaco'}}>
-                {this.state.display.description}
-              </Text>
+            numberOfLines={3}
+            renderTruncatedFooter={this._renderTruncatedFooter}
+            renderRevealedFooter={this._renderRevealedFooter}
+            onReady={this._handleTextReady}>
+            <Text style={{ fontFamily: 'Monaco' }}>
+              {this.state.display.description}
+            </Text>
           </ReadMore>
         </View>
-        <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 10, marginBottom: 10}}>
+        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10, marginBottom: 10 }}>
           <StarRating
             disabled={this.state.selectedRating > 0}
-            starStyle={{marginRight: 5}}
+            starStyle={{ marginRight: 5 }}
             starSize={30}
             emptyStar={require('../img/star_large_empty.png')}
             fullStar={require('../img/star_large_full.png')}
@@ -296,14 +311,14 @@ export default class DisplayDetail extends Component<Props, State> {
    * When the save button is pressed on the review
    */
   onReviewSavePress() {
-    updateRating(this.props.displayKey, getCurrentUser().uid, this.state.selectedRating, this.state.reviewText, () => {});
+    updateRating(this.props.displayKey, getCurrentUser().uid, this.state.selectedRating, this.state.reviewText, () => { });
   }
 
   /**
    * When the back button is pressed
    */
   onBackPressed() {
-    Actions.pop({type: ActionConst.REFRESH});
+    Actions.pop({ type: ActionConst.REFRESH });
   }
 
   /**
@@ -314,6 +329,73 @@ export default class DisplayDetail extends Component<Props, State> {
     this.setState({
       selectedRating: rating,
     });
+  }
+
+  onDirection = async () => {
+    const mapPreference = await AsyncStorage.getItem(Globals.USER_MAP_PREFERENCE);
+    const destination = { latitude: this.state.display.latitude, longitude: this.state.display.longitude};
+    
+    if (mapPreference) {
+      this.showDirection(mapPreference, destination);
+    } else {
+      ActionSheetIOS
+        .showActionSheetWithOptions(
+          {
+            options: [Globals.DIRECTION_OPTION_OPEN_IN_MAPS, Globals.DIRECTION_OPTION_OPEN_IN_GOOGLE_MAPS, Globals.DIRECTION_OPTION_COPY_ADDRESS, 'Cancel'],
+            cancelButtonIndex: 3
+          },
+          (buttonIndex) => {
+            if (buttonIndex === 0 || buttonIndex === 1) {
+
+              const map = buttonIndex === 0 ? Globals.MAPS : Globals.GOOGLE_MAPS;
+
+              Alert
+                .alert(
+                  '',
+                  `Great! Directions will now appear in ${map} from now on`,
+                  [
+                    {
+                      text: 'Got it!',
+                      onPress: () => {
+                        AsyncStorage.setItem(Globals.USER_MAP_PREFERENCE, map);
+                        this.showDirection(map, destination);
+                      }
+                    }
+                  ]
+                )
+            } else if (buttonIndex === 2) {
+              Clipboard.setString(this.state.display.address);
+            }
+          }
+        )
+    }
+  }
+
+  showDirection (map, destination) {
+    // ask for location permissions on the device
+    Permissions.request('location', 'whenInUse')
+      .then(response => {
+        if (response === 'whenInUse' || response == 'authorized') {
+          // get user's current location
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              openDirectionInMap(map, position.coords, destination);
+            },
+            () => {
+              Alert
+                .alert('Error', 'Error in finding your current location. Please try again.')
+            },
+            {
+              enableHighAccuracy: false,
+              timeout: 20 * 1000, // 20 seconds
+              maximumAge: 10 * 60 * 1000, // 10 minutes
+            },
+          );
+        } else {
+          Alert
+            .alert('Error', 'Please allow location permission from settings and try again.')
+        }
+      });
   }
 }
 
@@ -332,7 +414,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: 'white',
     shadowColor: 'black',
-    shadowOffset: {width: 0, height: 1},
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.4,
     shadowRadius: 3
   },
@@ -350,5 +432,18 @@ const styles = StyleSheet.create({
     fontFamily: 'Monaco',
     fontSize: 13,
     color: '#35343D'
+  },
+  directionButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 40,
+  },
+  directionText: {
+    marginLeft: 15, 
+    fontFamily: 'Avenir-Heavy', 
+    fontSize: 15, 
+    backgroundColor:'transparent', 
+    color: 'white'
   },
 });
