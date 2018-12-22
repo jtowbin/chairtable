@@ -28,7 +28,7 @@ module.exports = {
    */
   REVIEW_MAX_CHAR_LENGTH: 200,
   MAP_DEFAULT_ZOOM_LEVEL: 12,
-  MAP_MIN_ZOOM_LEVEL : 8,
+  MAP_MIN_ZOOM_LEVEL : 0,
   MAP_MAX_ZOOM_LEVEL : 18,
 
   /**

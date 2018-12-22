@@ -131,10 +131,12 @@ export default class DisplayDetail extends Component<Props, State> {
           <Text style={{ paddingRight: 20, paddingLeft: 20, width: '50%' }}>{this.state.display.address}</Text>
           <View style={{ paddingRight: 20, paddingLeft: 20, width: '50%' }}>
             <TouchableOpacity onPress={this.onDirection.bind(this)}>
+              <View style={{shadowColor: 'black', shadowOffset: {width: 0, height: 1}, shadowOpacity: 0.4, shadowRadius: 3, backgroundColor: 'transparent'}}>
               <ImageBackground resizeMode={'stretch'} style={styles.directionButton} source={require('../img/round_button_login.png')}>
-                <Image style={{width: 15, height: 17, marginBottom: 1}} resizeMode={'contain'} source={require('../img/directions_arrow.png')} />
-                <Text style={styles.directionText}>Direction</Text>
+                <Image style={{width: 17, height: 20}} resizeMode={'contain'} source={require('../img/directions_icon.png')} />
+                <Text style={styles.directionText}>Directions</Text>
               </ImageBackground>
+              </View>
           </TouchableOpacity>
           </View>
         </View>
