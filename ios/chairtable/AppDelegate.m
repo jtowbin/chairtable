@@ -33,7 +33,7 @@
   NSURL *jsCodeLocation;
   [[RCTBundleURLProvider sharedSettings] setDefaults];
 #if DEBUG
-  [[RCTBundleURLProvider sharedSettings] setJsLocation:@"192.168.1.114"];
+  [[RCTBundleURLProvider sharedSettings] setJsLocation:@"192.168.0.115"];
 #endif
   
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
@@ -54,15 +54,15 @@
 
 #ifdef __IPHONE_9_0
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary *)options {
-  
+
   [[FBSDKApplicationDelegate sharedInstance] application:application openURL:url sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey] annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
-  
+
   return YES;
 }
 #elif defined(__IPHONE_10_0)
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
   [[FBSDKApplicationDelegate sharedInstance] application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
-  
+
   return YES;
 }
 #endif

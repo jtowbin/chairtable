@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.7.5</string>
+	<string>1.8.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -32,7 +32,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>24</string>
+	<string>5</string>
 	<key>FacebookAppID</key>
 	<string>542195376126738</string>
 	<key>FacebookDisplayName</key>
@@ -70,24 +70,28 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Our app does not request this permission or utilize this functionality but it is included in our info.plist since our app utilizes the react-native-permissions library, which references this permission in its code.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>Bletooth will be accessed</string>
+	<string>Our app does not request this permission or utilize this functionality but it is included in our info.plist since our app utilizes the react-native-permissions library, which references this permission in its code.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Calendar will be accessed</string>
+	<string>Our app does not request this permission or utilize this functionality but it is included in our info.plist since our app utilizes the react-native-permissions library, which references this permission in its code.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera will be accessed</string>
+	<string>Rudolf needs your camera permission to take photos of displays.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Rudolf needs your location to help you quickly find and discover displays nearby</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Rudolf needs your location to help you quickly find and discover displays nearby</string>
 	<key>NSMainNibFile</key>
 	<string>LaunchScreen</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Our app does not request this permission or utilize this functionality but it is included in our info.plist since our app utilizes the react-native-permissions library, which references this permission in its code.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Photo library access is needed</string>
+	<string>Rudolf needs your photo library permission to select photos of displays.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Photo library access is needed</string>
+	<string>Rudolf needs your photo library permission to select photos of displays.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Speech recognition will be accessed</string>
+	<string>Our app does not request this permission or utilize this functionality but it is included in our info.plist since our app utilizes the react-native-permissions library, which references this permission in its code.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>FontAwesome.ttf</string>
